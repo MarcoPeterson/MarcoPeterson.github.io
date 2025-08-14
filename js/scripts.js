@@ -26,62 +26,79 @@ window.addEventListener('DOMContentLoaded', event => {
   });
 });
 
-/* ================== Code Rain Background (Matrix) ================== */
-(function(){
+/* ================== Matrix Code Rain (NO TRAILS) ==================
+   Requirements you asked for:
+   - very slow fall
+   - crisp (no ghost trails)
+   - rows alternate: even rows use "0", odd rows use "11"
+   - lots of digits visible
+=================================================================== */
+(function initMatrix(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { alpha: true });
-  let W, H, columns, drops;
-  let fontSize = 18;                     // slightly larger glyphs
-  const chars = "01";
-  const matrix = getComputedStyle(document.documentElement)
-                   .getPropertyValue('--matrix').trim() || '#00FF41';
 
-  // DRAMATIC slow-down controls
-  const baseSpeed = 0.12;                // << super slow
-  const varSpeed  = 0.10;                // randomness around base
-  const trailFade = 0.06;                // lower = longer trails
+  // Tunables
+  let fontSize = 18;           // glyph size (CSS pixels)
+  const baseSpeed = 0.03;      // VERY slow
+  const varSpeed  = 0.04;      // slight randomness
 
-  function hexToRgb(hex){
-    const c = hex.replace('#','');
-    const b = c.length === 3 ? c.split('').map(v=>v+v).join('') : c;
-    return [parseInt(b.substr(0,2),16), parseInt(b.substr(2,2),16), parseInt(b.substr(4,2),16)].join(',');
-  }
-  const matrixRgb = hexToRgb(matrix);
+  // Color (Matrix green from CSS variable)
+  const cssMatrix = getComputedStyle(document.documentElement)
+                      .getPropertyValue('--matrix').trim();
+  const color = cssMatrix || '#00FF41';
+
+  // State
+  let W, H, columns, drops, speeds, colWidth, rowHeight, charW;
 
   function resize(){
     const ratio = window.devicePixelRatio || 1;
     W = canvas.width  = Math.floor(window.innerWidth  * ratio);
     H = canvas.height = Math.floor(window.innerHeight * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    columns = Math.ceil(window.innerWidth / fontSize);
-    // start many streams off-screen for staggered entry
-    drops = new Array(columns).fill(0).map(() => -Math.random() * 80);
+
     ctx.font = `${fontSize}px monospace`;
+    ctx.textBaseline = 'top';
+    charW = Math.max(9, ctx.measureText('0').width); // width of one char
+    colWidth = charW * 0.9;                          // slightly denser than strict grid
+    rowHeight = Math.floor(fontSize * 1.12);         // vertical spacing
+
+    columns = Math.max(1, Math.ceil(window.innerWidth / colWidth));
+    drops   = Array.from({length: columns}, () => -Math.random() * 40);
+    speeds  = Array.from({length: columns}, () => baseSpeed + Math.random() * varSpeed);
   }
 
   function draw(){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // trailing fade
-    ctx.fillStyle = `rgba(0, 0, 0, ${trailFade})`;
-    ctx.fillRect(0, 0, W, H);
+    // NO TRAILS: clear each frame
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = color;
 
     for (let i = 0; i < columns; i++){
-      const text = chars[Math.floor(Math.random() * chars.length)];
-      const x = i * fontSize;
-      const y = drops[i] * fontSize;
+      const x = Math.floor(i * colWidth);
+      const rowIndex = drops[i] | 0;              // current integer row
+      const y = rowIndex * rowHeight;
 
-      ctx.fillStyle = `rgba(${matrixRgb}, 0.95)`;
-      ctx.fillText(text, x, y);
+      // Alternate rows: even -> "0", odd -> "11"
+      if ((rowIndex & 1) === 0) {
+        ctx.fillText('0', x, y);
+      } else {
+        // Draw a tight "11" that fits in one column width
+        ctx.fillText('1', x, y);
+        ctx.fillText('1', x + charW * 0.65, y);
+      }
 
-      // reset stream occasionally after it leaves the screen
-      if (y > H && Math.random() > 0.995) drops[i] = -Math.random() * 20;
-
-      // VERY SLOW descent
-      drops[i] += baseSpeed + Math.random() * varSpeed; // ~0.12–0.22 px per frame
+      // Wrap/reset with a little randomness after leaving screen
+      if (y > H && Math.random() > 0.985) {
+        drops[i]  = -Math.random() * 20;
+        speeds[i] = baseSpeed + Math.random() * varSpeed;
+      } else {
+        drops[i] += speeds[i];
+      }
     }
+
     requestAnimationFrame(draw);
   }
 
