@@ -2,31 +2,24 @@
 * Start Bootstrap - Resume v7.0.4
 * MIT License
 */
-window.addEventListener('DOMContentLoaded', event => {
+window.addEventListener('DOMContentLoaded', () => {
   // Activate Bootstrap scrollspy on the main nav element
   const sideNav = document.body.querySelector('#sideNav');
   if (sideNav) {
-    new bootstrap.ScrollSpy(document.body, {
-      target: '#sideNav',
-      offset: 74,
-    });
+    new bootstrap.ScrollSpy(document.body, { target: '#sideNav', offset: 74 });
   }
 
   // Collapse responsive navbar when toggler is visible (mobile)
   const navbarToggler = document.body.querySelector('.navbar-toggler');
-  const responsiveNavItems = [].slice.call(
-    document.querySelectorAll('#navbarResponsive .nav-link')
-  );
-  responsiveNavItems.map(function (responsiveNavItem) {
-    responsiveNavItem.addEventListener('click', () => {
-      if (window.getComputedStyle(navbarToggler).display !== 'none') {
-        navbarToggler.click();
-      }
+  const responsiveNavItems = [].slice.call(document.querySelectorAll('#navbarResponsive .nav-link'));
+  responsiveNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.getComputedStyle(navbarToggler).display !== 'none') navbarToggler.click();
     });
   });
 });
 
-/* ================== Matrix 0/1 Rain (slow, behind content, off sidebar) ================== */
+/* ================== Matrix 0/1 Streams (slow, behind content, dim over text) ================== */
 (function(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
@@ -35,100 +28,119 @@ window.addEventListener('DOMContentLoaded', event => {
   const DPR  = Math.max(1, window.devicePixelRatio || 1);
 
   // Visual tuning
-  const FONT_SIZE      = 16;        // px per column cell
-  const TAIL_LEN       = 8;         // short/light trail
-  const MIN_SPEED      = 30;        // px/sec
-  const MAX_SPEED      = 60;        // px/sec
-  const MIN_SWITCH_MS  = 900;       // slow 0↔1 flips
-  const MAX_SWITCH_MS  = 1800;
+  const CELL       = 18;          // font size + column width
+  const TAIL       = 14;          // number of glyphs per column (vertical line)
+  const SPD_MIN    = 28;          // px/sec  (slow)
+  const SPD_MAX    = 55;          // px/sec
+  const SWITCH_MIN = 1400;        // ms between 0↔1 toggle at head (slower)
+  const SWITCH_MAX = 2800;
 
-  const GLYPH_COLOR    = [0, 255, 65];   // Matrix green
-  const HEAD_ALPHA     = 0.95;           // head brightness
-  const TRAIL_ALPHA_0  = 0.16;           // first trail element alpha
-  const TRAIL_FALLOFF  = 0.02;           // alpha decrease per trail step
+  const COLOR      = [0, 255, 65];  // Matrix green
+  const HEAD_A     = 0.95;          // head alpha
+  const TRAIL_A0   = 0.18;          // first trail alpha (light)
+  const TRAIL_DA   = 0.012;         // alpha falloff per glyph
 
-  let W, H, COLS, colW;
-  let streams = [];
+  let W, H, COLS, streams = [];
   let lastT = performance.now();
+  let contentRectCss = null; // updated on resize/scroll
 
   function cssSize(el){ return { w: el.clientWidth, h: el.clientHeight }; }
 
+  function updateContentRect(){
+    const container = document.querySelector('.container-fluid');
+    if (!container) return;
+    const r = container.getBoundingClientRect();
+    const c = canvas.getBoundingClientRect();
+    // Convert to canvas CSS coordinates
+    contentRectCss = {
+      left:  r.left  - c.left,
+      top:   r.top   - c.top,
+      right: r.right - c.left,
+      bottom:r.bottom- c.top
+    };
+  }
+
   function layout(){
-    // Match canvas pixels to its CSS box (CSS already moves it off the sidebar on desktop)
     const { w, h } = cssSize(canvas);
     W = canvas.width  = Math.max(1, Math.floor(w * DPR));
     H = canvas.height = Math.max(1, Math.floor(h * DPR));
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    colW = FONT_SIZE;
-    COLS = Math.ceil(w / colW);
-
-    // Initialize columns
+    COLS = Math.ceil(w / CELL);
     streams = new Array(COLS).fill(0).map((_, i) => ({
-      x: i * colW + colW / 2,           // center glyph in its cell
-      y: -Math.random() * h,            // start above screen
-      speed: MIN_SPEED + Math.random() * (MAX_SPEED - MIN_SPEED),
-      glyph: Math.random() < 0.5 ? '0' : '1',
+      x: i * CELL + CELL/2,
+      y: -Math.random() * h,
+      speed: SPD_MIN + Math.random() * (SPD_MAX - SPD_MIN),
+      // head value toggles slowly; entire stream alternates 0/1 downwards
+      headVal: Math.random() < 0.5 ? 0 : 1,
       lastSwitch: performance.now(),
-      switchEvery: MIN_SWITCH_MS + Math.random() * (MAX_SWITCH_MS - MIN_SWITCH_MS),
-      trail: []
+      switchEvery: SWITCH_MIN + Math.random() * (SWITCH_MAX - SWITCH_MIN),
     }));
 
-    ctx.font = `${FONT_SIZE}px monospace`;
+    ctx.font = `${CELL}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
+    updateContentRect();
+  }
+
+  function dimFactor(x, y){
+    // reduce visibility over the resume content so text is readable
+    if (!contentRectCss) return 1;
+    if (x >= contentRectCss.left && x <= contentRectCss.right &&
+        y >= contentRectCss.top  && y <= contentRectCss.bottom) {
+      return 0.35; // dim inside content area
+    }
+    return 1;
   }
 
   function frame(t){
-    const dt = Math.min(100, t - lastT) / 1000; // seconds
+    const dt = Math.min(120, t - lastT) / 1000; // seconds
     lastT = t;
 
-    // Full clear so the background never accumulates
+    // Clear completely so no residue/afterglow remains
     ctx.clearRect(0, 0, W, H);
 
+    const cssH = canvas.clientHeight;
+
     streams.forEach(s => {
-      // slow independent 0↔1 switching
+      // slow 0↔1 toggling at the head only
       if (t - s.lastSwitch > s.switchEvery){
-        s.glyph = (s.glyph === '0') ? '1' : '0';
+        s.headVal = s.headVal ? 0 : 1;
         s.lastSwitch = t;
-        s.switchEvery = MIN_SWITCH_MS + Math.random() * (MAX_SWITCH_MS - MIN_SWITCH_MS);
+        s.switchEvery = SWITCH_MIN + Math.random() * (SWITCH_MAX - SWITCH_MIN);
       }
 
-      // advance
+      // advance head
       s.y += s.speed * dt;
 
-      // wrap when below screen
-      const cssH = canvas.clientHeight;
-      if (s.y > cssH + TAIL_LEN * FONT_SIZE){
+      // wrap
+      if (s.y > cssH + TAIL * CELL){
         s.y = -Math.random() * cssH;
-        s.trail.length = 0;
       }
 
-      // push head position and clamp the trail
-      s.trail.push(s.y);
-      if (s.trail.length > TAIL_LEN) s.trail.shift();
+      // Draw from head downward (alternating 0/1 vertically)
+      for (let k = 0; k < TAIL; k++){
+        const y = s.y - k * CELL;
+        if (y < -CELL || y > cssH + CELL) continue;
 
-      // draw trail (older first; light)
-      for (let i = 1; i < s.trail.length; i++){
-        const yPos  = s.trail[s.trail.length - 1 - i];
-        const alpha = Math.max(0, TRAIL_ALPHA_0 - i * TRAIL_FALLOFF);
-        if (alpha <= 0) break;
-        ctx.fillStyle = `rgba(${GLYPH_COLOR.join(',')},${alpha})`;
-        ctx.fillText(s.glyph, s.x, yPos);
+        const val = ((s.headVal + k) % 2); // 0/1 alternating by row
+        const baseAlpha = k === 0 ? HEAD_A : Math.max(0, TRAIL_A0 - k * TRAIL_DA);
+        const alpha = baseAlpha * dimFactor(s.x, y);
+
+        if (alpha <= 0.001) continue;
+
+        ctx.shadowColor = `rgba(${COLOR.join(',')},${k===0?0.5:0})`;
+        ctx.shadowBlur  = k===0 ? 6 : 0;
+        ctx.fillStyle   = `rgba(${COLOR.join(',')},${alpha})`;
+        ctx.fillText(val.toString(), s.x, y);
       }
-
-      // draw head (slight glow)
-      ctx.shadowColor = `rgba(${GLYPH_COLOR.join(',')},0.6)`;
-      ctx.shadowBlur  = 6;
-      ctx.fillStyle   = `rgba(${GLYPH_COLOR.join(',')},${HEAD_ALPHA})`;
-      ctx.fillText(s.glyph, s.x, s.y);
-      ctx.shadowBlur = 0;
     });
 
     requestAnimationFrame(frame);
   }
 
-  window.addEventListener('resize', layout);
+  window.addEventListener('resize', () => { layout(); });
+  window.addEventListener('scroll',  () => { updateContentRect(); });
   layout();
   requestAnimationFrame(frame);
 })();
