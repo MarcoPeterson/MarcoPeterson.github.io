@@ -1,5 +1,5 @@
 /*!
-* Start Bootstrap - Resume v7.0.4 (https://startbootstrap.com/theme/resume)
+* Start Bootstrap - Resume v7.0.4
 * MIT License
 */
 window.addEventListener('DOMContentLoaded', event => {
@@ -26,23 +26,29 @@ window.addEventListener('DOMContentLoaded', event => {
   });
 });
 
-/* ================== Code Rain Background ================== */
+/* ================== Code Rain Background (Matrix) ================== */
 (function(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { alpha: true });
-  let W, H, columns, drops, fontSize = 16, mouseX = null;
+  let W, H, columns, drops;
+  let fontSize = 18;                     // slightly larger glyphs
   const chars = "01";
-  const brand = getComputedStyle(document.documentElement)
-                  .getPropertyValue('--brand').trim() || '#0d6efd';
+  const matrix = getComputedStyle(document.documentElement)
+                   .getPropertyValue('--matrix').trim() || '#00FF41';
+
+  // DRAMATIC slow-down controls
+  const baseSpeed = 0.12;                // << super slow
+  const varSpeed  = 0.10;                // randomness around base
+  const trailFade = 0.06;                // lower = longer trails
 
   function hexToRgb(hex){
     const c = hex.replace('#','');
     const b = c.length === 3 ? c.split('').map(v=>v+v).join('') : c;
     return [parseInt(b.substr(0,2),16), parseInt(b.substr(2,2),16), parseInt(b.substr(4,2),16)].join(',');
   }
-  const brandRgb = hexToRgb(brand);
+  const matrixRgb = hexToRgb(matrix);
 
   function resize(){
     const ratio = window.devicePixelRatio || 1;
@@ -50,16 +56,16 @@ window.addEventListener('DOMContentLoaded', event => {
     H = canvas.height = Math.floor(window.innerHeight * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     columns = Math.ceil(window.innerWidth / fontSize);
-    drops = new Array(columns).fill(Math.random() * -20);
+    // start many streams off-screen for staggered entry
+    drops = new Array(columns).fill(0).map(() => -Math.random() * 80);
     ctx.font = `${fontSize}px monospace`;
   }
 
   function draw(){
-    // Respect reduce motion
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     // trailing fade
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.fillStyle = `rgba(0, 0, 0, ${trailFade})`;
     ctx.fillRect(0, 0, W, H);
 
     for (let i = 0; i < columns; i++){
@@ -67,27 +73,19 @@ window.addEventListener('DOMContentLoaded', event => {
       const x = i * fontSize;
       const y = drops[i] * fontSize;
 
-      // brighten near cursor
-      let glow = 0.6;
-      if (mouseX !== null){
-        const colX = i * fontSize;
-        const d = Math.abs(colX - mouseX);
-        glow = Math.max(0.6, 1.2 - Math.min(d / 180, 1));
-      }
-
-      ctx.fillStyle = `rgba(${brandRgb}, ${glow})`;
+      ctx.fillStyle = `rgba(${matrixRgb}, 0.95)`;
       ctx.fillText(text, x, y);
 
-      if (y > H && Math.random() > 0.975) drops[i] = 0;
-      drops[i] += (1 + Math.random() * 0.9);
+      // reset stream occasionally after it leaves the screen
+      if (y > H && Math.random() > 0.995) drops[i] = -Math.random() * 20;
+
+      // VERY SLOW descent
+      drops[i] += baseSpeed + Math.random() * varSpeed; // ~0.12–0.22 px per frame
     }
     requestAnimationFrame(draw);
   }
 
   window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', e => { mouseX = e.clientX; });
-  window.addEventListener('mouseleave', () => { mouseX = null; });
-
   resize();
   requestAnimationFrame(draw);
 })();
