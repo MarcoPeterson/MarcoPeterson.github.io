@@ -16,66 +16,83 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ================== MATRIX CODE RAIN ==================
-   - Digits: '0' and '1' only
-   - Light trail (no page darkening): fade by ERASE
-   - Slow columns, dense streams
-======================================================= */
+/* ================== MATRIX CODE RAIN (crisp 0/1 with light trail) ==================
+   - No glow, no page darkening, no stripes
+   - Head + short tail made of actual digits with decreasing alpha
+   - Slower streams
+=============================================================================== */
 (function matrix(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d', { alpha: true });
 
   // Tunables
-  const fontSize  = 18;        // glyph size (px)
-  const fadeAmt   = 0.08;      // trail strength (higher = shorter trail)
-  const baseSpeed = 0.03;      // slow
-  const varSpeed  = 0.03;      // slight random
-  const digits    = ['0','1'];
-  const color     = getComputedStyle(document.documentElement)
+  const fontSize   = 18;        // px
+  const tailLen    = 8;         // number of trailing digits
+  const baseSpeed  = 0.05;      // slow
+  const varSpeed   = 0.03;      // slight randomness
+  const headAlpha  = 1.0;       // head brightness
+  const tailAlpha0 = 0.75;      // first tail digit alpha (then decays)
+  const digits     = ['0','1'];
+  const colorHex   = getComputedStyle(document.documentElement)
                       .getPropertyValue('--matrix').trim() || '#00FF41';
 
-  // State
-  let W, H, columns, drops, speeds;
+  // Convert hex to rgb for alpha blending
+  function hexToRgb(hex){
+    const c = hex.replace('#','');
+    const s = c.length === 3 ? c.split('').map(v=>v+v).join('') : c;
+    return {
+      r: parseInt(s.slice(0,2),16),
+      g: parseInt(s.slice(2,4),16),
+      b: parseInt(s.slice(4,6),16)
+    };
+  }
+  const rgb = hexToRgb(colorHex);
+
+  let W, H, columns, yPos, speeds;
 
   function resize(){
     const ratio = window.devicePixelRatio || 1;
     W = canvas.width  = Math.floor(window.innerWidth  * ratio);
     H = canvas.height = Math.floor(window.innerHeight * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
     ctx.font = `${fontSize}px monospace`;
     ctx.textBaseline = 'top';
 
     columns = Math.ceil(window.innerWidth / fontSize);
-    drops   = Array.from({length: columns}, () => -Math.random() * 60);
+    yPos    = Array.from({length: columns}, () => -Math.random() * 40);
     speeds  = Array.from({length: columns}, () => baseSpeed + Math.random() * varSpeed);
   }
 
   function draw(){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // ERASE to create trails without darkening the page
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = `rgba(0,0,0,${fadeAmt})`;
-    ctx.fillRect(0, 0, W, H);
+    // Start fresh each frame -> no glow/stripes
+    ctx.clearRect(0, 0, W, H);
 
-    // Now draw fresh digits on top
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = color;
+    for (let col = 0; col < columns; col++){
+      const headY = yPos[col];
 
-    for (let i = 0; i < columns; i++){
-      const x = i * fontSize;
-      const y = drops[i] * fontSize;
+      // draw head
+      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${headAlpha})`;
+      ctx.fillText(digits[(Math.random()*2)|0], col*fontSize, headY*fontSize);
 
-      const ch = digits[(Math.random() * 2) | 0]; // '0' or '1'
-      ctx.fillText(ch, x, y);
+      // draw tail (decreasing alpha, discrete digits)
+      for (let t = 1; t <= tailLen; t++){
+        const y = (headY - t) * fontSize;
+        if (y < -fontSize) break;
+        const a = Math.max(tailAlpha0 * (1 - t/(tailLen+1)), 0);
+        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`;
+        ctx.fillText(digits[(Math.random()*2)|0], col*fontSize, y);
+      }
 
-      if (y > H && Math.random() > 0.985) {       // reset off-screen
-        drops[i]  = -Math.random() * 20;
-        speeds[i] = baseSpeed + Math.random() * varSpeed;
+      // advance
+      const py = headY * fontSize;
+      if (py > H && Math.random() > 0.985){
+        yPos[col]  = -Math.random() * 20;
+        speeds[col] = baseSpeed + Math.random() * varSpeed;
       } else {
-        drops[i] += speeds[i];
+        yPos[col] += speeds[col];
       }
     }
 
