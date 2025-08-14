@@ -1,6 +1,5 @@
 /* =========================================================
    Marco / Portfolio Styles — Glass left sidebar + Matrix rain
-   Bootstrap 5 + Raleway/Nunito
    ========================================================= */
 
 /* ---------- Theme Variables ---------- */
@@ -31,7 +30,7 @@ body {
 }
 .container-fluid { position: relative; z-index: 2; }
 
-/* Animated gradient layer behind the canvas */
+/* Animated gradient behind canvas */
 body::before{
   content:"";
   position: fixed; inset: 0;
@@ -67,11 +66,23 @@ body::before{
   border-right: 1px solid rgba(255,255,255,.10);
   z-index: 10;
 }
-#sideNav .navbar-nav { gap: .25rem; }
-#sideNav .navbar-nav .nav-link { color: #e7ecf5; }
-#sideNav .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
-#sideNav .navbar-brand { display: block; text-align: center; padding: 1rem 1rem .25rem; }
+
+/* Photo above menu */
+#sideNav .navbar-brand { display: block; text-align: center; padding: 1rem 1rem .5rem; }
 #sideNav .img-profile { max-width: 10.5rem; border: 3px solid rgba(255,255,255,.25); }
+
+/* Menu: horizontal, centered, wraps nicely */
+#sideNav .navbar-nav{
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: .35rem .9rem;
+  padding: .25rem 1rem 1rem;
+}
+#sideNav .navbar-nav .nav-link { color: #e7ecf5; padding: .25rem .35rem; }
+#sideNav .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
 
 /* Push main content to the right on desktop */
 @media (min-width: 992px){
@@ -79,7 +90,7 @@ body::before{
   #bg-canvas{ left: var(--sidebar-w); width: calc(100vw - var(--sidebar-w)); }
 }
 
-/* Mobile: sidebar becomes a top bar */
+/* Mobile: sidebar becomes top bar */
 @media (max-width: 991.98px){
   #sideNav{
     width: 100%; height: auto; right: 0;
@@ -104,6 +115,9 @@ h1, h2, h3, h4, h5 {
 h1 { font-weight: 900; line-height: 1.1; }
 h2 { font-weight: 800; }
 .resume-section h3 { font-weight: 800; } /* job titles bold */
+
+/* Make your name ~2× larger */
+#about h1.mb-0{ font-size: clamp(2.4rem, 6.2vw, 4.8rem); }
 
 .text-primary { color: var(--brand) !important; }
 .lead { color: #c7d0db; font-weight: 400; }
