@@ -1,5 +1,5 @@
 /* =========================================================
-   Marco/Portfolio Styles — animated gradient + code rain
+   Marco/Portfolio Styles — left sidebar + Matrix code rain
    Bootstrap 5 + Raleway/Nunito
    ========================================================= */
 
@@ -13,7 +13,7 @@
   --bg:    #0b1020;
   --card:  rgba(255,255,255,.08);
   --card-border: rgba(255,255,255,.15);
-  --glass: rgba(13,17,27,.6);
+  --glass: rgba(13,17,27,.65);
   --shadow: 0 10px 30px rgba(0,0,0,.30);
 }
 
@@ -29,31 +29,31 @@ body {
   position: relative;
 }
 
-/* Animated gradient layer behind the canvas */
+/* OPTIONAL animated gradient behind the canvas (comment out if too busy) */
 body::before{
   content:"";
   position: fixed; inset: 0;
   background:
-    radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.25), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.35), transparent 60%),
-    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.15), transparent 60%),
+    radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.22), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.30), transparent 60%),
+    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.12), transparent 60%),
     linear-gradient(120deg, #080c1a, #0b1020 40%, #0c1022 60%, #080c1a);
   filter: saturate(110%);
   animation: floatGradient 40s linear infinite;
   z-index: 0;
 }
 
-/* Code-rain canvas above gradient, below content */
+/* Matrix canvas above gradient, below content */
 #bg-canvas{
   position: fixed; inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: .55;                 /* a touch brighter for “Matrix” */
-  mix-blend-mode: screen;
+  opacity: 1;                /* solid, crisp digits */
+  mix-blend-mode: normal;    /* no additive glow */
 }
 
 /* Content above background layers */
-#site-topbar, .container-fluid { position: relative; z-index: 2; }
+.container-fluid, #sideNav { position: relative; z-index: 2; }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce){
@@ -99,26 +99,36 @@ a:not(.btn):not(.social-icon):hover{
 hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 
 /* =========================================================
-   TOP HORIZONTAL NAV (instead of left sidebar)
+   LEFT SIDEBAR (like arbergmann.github.io)
    ========================================================= */
-.navbar#sideNav {            /* reuse existing markup/id */
-  width: 100%;
-  position: fixed; top: 0; left: 0; right: 0;
-  height: auto;
-  background: var(--glass) !important;  /* glass bar */
+.navbar#sideNav {
+  position: fixed;
+  top: 0; left: 0;
+  width: 18rem;
+  height: 100vh;
+  background: var(--glass) !important;
   backdrop-filter: blur(8px) saturate(140%);
+  border-right: 1px solid rgba(255,255,255,.12);
   box-shadow: var(--shadow);
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  z-index: 10;
+  overflow-y: auto;
 }
-.container-fluid {           /* push content below bar */
-  padding-top: 4.25rem;
+.navbar-brand .img-profile { max-width: 12rem; border: 4px solid rgba(255,255,255,.25); }
+
+.container-fluid { margin-left: 18rem; } /* push content right of sidebar */
+
+.navbar-dark .navbar-nav {
+  flex-direction: column; gap: .25rem; padding: .5rem 0 1rem 0;
 }
-.navbar-dark .navbar-nav { flex-direction: row; gap: 1rem; }
 .navbar-dark .navbar-nav .nav-link { color: #e7ecf5; }
 .navbar-dark .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
-.navbar-brand .img-profile { max-width: 3rem; border: 2px solid rgba(255,255,255,.25); }
+
+/* Mobile: collapse to top bar */
 @media (max-width: 991.98px){
+  .navbar#sideNav {
+    width: 100%; height: auto; position: fixed; right: 0;
+    border-right: none; border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+  .container-fluid { margin-left: 0; padding-top: 4.25rem; }
   .navbar-dark .navbar-nav { flex-direction: column; gap: 0; }
 }
 
@@ -171,7 +181,7 @@ hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 }
 
 /* ---------- Lists / subheadings ---------- */
-/* Make ALL list items pure white for contrast */
+/* Make ALL bullet items pure white for contrast */
 .resume-section ul { padding-left: 1.1rem; }
 .resume-section li { color: #fff; }
 .resume-section li + li { margin-top: .4rem; }
@@ -213,7 +223,7 @@ hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 /* ---------- Print ---------- */
 @media print {
   #sideNav { display: none !important; }
-  .container-fluid { padding-top: 0 !important; }
+  .container-fluid { margin-left: 0 !important; padding-top: 0 !important; }
   .resume-section { padding: 1rem !important; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; }
 }
