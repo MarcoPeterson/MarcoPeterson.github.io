@@ -1,5 +1,5 @@
 /* =========================================================
-   Marco/Portfolio Styles — LEFT SIDEBAR + Matrix code rain
+   Marco/Portfolio — LEFT SIDEBAR + Matrix code rain
    ========================================================= */
 
 :root{
@@ -26,7 +26,7 @@ body{
   position: relative;
 }
 
-/* soft animated gradient (comment out if you prefer flat) */
+/* soft animated gradient (optional) */
 body::before{
   content:"";
   position: fixed; inset: 0;
@@ -39,10 +39,10 @@ body::before{
   z-index: 0;
 }
 
-/* MATRIX CANVAS – sits behind everything */
+/* MATRIX CANVAS — behind everything */
 #bg-canvas{
   position: fixed; inset: 0;
-  z-index: 0;          /* BEHIND sidebar + content */
+  z-index: 0;                  /* behind */
   pointer-events: none;
   opacity: 1;
 }
@@ -50,10 +50,10 @@ body::before{
 /* keep content above */
 #sideNav, .container-fluid { position: relative; z-index: 2; }
 
-/* reduce motion preference */
+/* reduce motion */
 @media (prefers-reduced-motion: reduce){
   body::before{ animation: none; }
-  #bg-canvas { display:none; }
+  #bg-canvas { display: none; }
 }
 
 /* ---------- type ---------- */
@@ -63,15 +63,15 @@ h1,h2,h3,h4,h5{
 }
 h1{ font-weight:900; line-height:1.1; }
 h2{ font-weight:800; }
-.resume-section h3{ font-weight:800; }          /* job titles bold */
-.resume-section .flex-shrink-0 .text-primary{ font-weight:700; } /* dates bold */
+.resume-section h3{ font-weight:800; }                          /* job titles bold */
+.resume-section .flex-shrink-0 .text-primary{ font-weight:700; }/* dates bold */
 .text-primary{ color:var(--brand)!important; }
 .lead{ color:#c7d0db; }
 a{ color:var(--brand); text-decoration:none; }
 a:hover{ text-decoration:underline; }
 hr.m-0{ border:0; border-top:1px solid rgba(255,255,255,.08); }
 
-/* slight readability boost over the matrix */
+/* readability over matrix */
 .container-fluid, #sideNav { text-shadow: 0 1px 2px rgba(0,0,0,.35); }
 
 /* =========================================================
@@ -79,21 +79,42 @@ hr.m-0{ border:0; border-top:1px solid rgba(255,255,255,.08); }
    ========================================================= */
 .navbar#sideNav{
   position: fixed; top:0; left:0;
-  width: 20rem;                /* wider to avoid overlap */
+  width: 20rem;                 /* sidebar width */
   height: 100vh;
   background: var(--glass)!important;
   backdrop-filter: blur(8px) saturate(140%);
   border-right: 1px solid rgba(255,255,255,.12);
   box-shadow: var(--shadow);
   overflow-y: auto;
-  z-index: 3;                  /* above canvas & content */
+  z-index: 3;
 }
-.navbar-brand .img-profile{ max-width:12rem; border:4px solid rgba(255,255,255,.25); }
-.container-fluid{ margin-left: 20rem; }         /* match sidebar width */
+
+/* put PHOTO ABOVE the menu */
+#sideNav .navbar-brand{
+  display:block;
+  padding: 1.25rem 1rem .5rem;
+  text-align:center;
+}
+#sideNav .navbar-brand .img-profile{
+  max-width: 12rem;
+  border: 4px solid rgba(255,255,255,.25);
+  border-radius: 50%;
+  display:inline-block;
+}
+#sideNav .navbar-nav{
+  flex-direction: column;
+  gap: .25rem;
+  padding: .75rem 0 1.25rem;
+}
+
+.container-fluid{
+  margin-left: 22rem;      /* pushes content clear of sidebar */
+  padding-left: 1.25rem;   /* a little inner padding */
+  padding-right: 1.25rem;
+}
 
 #sideNav .navbar-toggler{ display:none; }
 #sideNav .navbar-collapse{ display:block !important; }
-#sideNav .navbar-nav{ flex-direction:column; gap:.25rem; padding:.5rem 0 1rem; }
 #sideNav .nav-link{ color:#e7ecf5; }
 #sideNav .nav-link:hover{ color:#fff; text-decoration:none; }
 
@@ -111,7 +132,10 @@ hr.m-0{ border:0; border-top:1px solid rgba(255,255,255,.08); }
 
 /* sections */
 .resume-section{ padding:3rem 1.25rem; scroll-margin-top:6rem; }
-.resume-section .resume-section-content{ max-width:1000px; }
+.resume-section .resume-section-content{
+  max-width: 1000px;
+  margin: 0 auto;              /* center the resume content */
+}
 @media (min-width: 992px){ .resume-section{ padding:4rem 3rem; } }
 
 /* about */
