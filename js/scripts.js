@@ -38,8 +38,8 @@ window.addEventListener('DOMContentLoaded', event => {
                    .getPropertyValue('--matrix').trim() || '#00FF41';
 
   // Dramatically slow descent + long trails
-  const baseSpeed = 0.06;            // super slow
-  const varSpeed  = 0.06;            // small randomness
+  const baseSpeed = 0.12;            // super slow
+  const varSpeed  = 0.10;            // small randomness
   const trailFade = 0.04;            // lower -> longer trails
 
   function hexToRgb(hex){
