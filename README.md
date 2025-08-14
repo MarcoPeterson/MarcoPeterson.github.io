@@ -1,7 +1,8 @@
 ## Data Science Online CV (Backend)
 
-[Project Site](https://arbergmann.github.io)
+[Project Site](https://marcopeterson.github.io)
 
 ## Data Science Portfolio (Backend)
 
-[Project Site](https://arbergmann.github.io/portfolio)
+[Project Site](https://marcopeterson.github.io/portfolio)
+
