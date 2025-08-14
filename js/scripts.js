@@ -39,7 +39,7 @@ window.addEventListener('DOMContentLoaded', event => {
                    .getPropertyValue('--matrix').trim() || '#00FF41';
 
   // DRAMATIC slow-down controls
-  const baseSpeed = 0.12;                // << super slow
+  const baseSpeed = 0.05;                // << super slow
   const varSpeed  = 0.10;                // randomness around base
   const trailFade = 0.06;                // lower = longer trails
 
