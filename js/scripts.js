@@ -3,6 +3,7 @@
 * MIT License
 */
 window.addEventListener('DOMContentLoaded', () => {
+  // Activate Bootstrap scrollspy on the main nav element
   const sideNav = document.querySelector('#sideNav');
   if (sideNav) {
     new bootstrap.ScrollSpy(document.body, {
@@ -11,12 +12,13 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Collapse responsive navbar when toggler is visible
   const navbarToggler = document.querySelector('.navbar-toggler');
   const responsiveNavItems = [].slice.call(
     document.querySelectorAll('#navbarResponsive .nav-link')
   );
-  responsiveNavItems.map((item) => {
-    item.addEventListener('click', () => {
+  responsiveNavItems.map((responsiveNavItem) => {
+    responsiveNavItem.addEventListener('click', () => {
       if (window.getComputedStyle(navbarToggler).display !== 'none') {
         navbarToggler.click();
       }
@@ -31,31 +33,36 @@ window.addEventListener('DOMContentLoaded', () => {
   const ctx = canvas.getContext('2d', { alpha: true });
   ctx.textBaseline = 'top';
 
-  // Tunables (faster fall)
-  let fontSize = 18;
-  const trailLen = 12;
-  let baseSpeed = 0.34;     // ↑ faster
-  let varSpeed  = 0.20;     // ↑ variability
-  const color   = [0, 255, 65];
+  // Tunables
+  let fontSize = 18;                 // glyph size
+  const trailLen = 12;               // digits per column (visual trail)
+  let baseSpeed = 0.22;              // a bit faster per your ask
+  let varSpeed  = 0.12;              // randomness per column
+  const color   = [0, 255, 65];      // matrix green
 
   // Layout
   let W = 0, H = 0, columns = 0, drops = [];
-  let skipLeft = 0;
-  let contentBounds = { left: 0, right: 0 };
+  let skipLeft = 0;                  // pixels to skip (left pane)
+  let contentBounds = { left: 0, right: 0 }; // to dim over resume text
 
   function updateBounds(){
     const ratio = window.devicePixelRatio || 1;
     canvas.width  = Math.floor(window.innerWidth  * ratio);
     canvas.height = Math.floor(window.innerHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);  // draw in CSS pixels
     W = window.innerWidth;
     H = window.innerHeight;
 
-    // keep off the left pane
+    // left pane width (don't draw under it)
     const side = document.getElementById('sideNav');
-    skipLeft = side ? Math.ceil(side.getBoundingClientRect().right) : 0;
+    if (side){
+      const r = side.getBoundingClientRect();
+      skipLeft = Math.ceil(r.right);
+    } else {
+      skipLeft = 0;
+    }
 
-    // content bounds to dim rain over resume text
+    // content bounds to reduce visibility over text
     const wrap = document.querySelector('.page-wrapper');
     if (wrap){
       const r2 = wrap.getBoundingClientRect();
@@ -74,9 +81,10 @@ window.addEventListener('DOMContentLoaded', () => {
   function draw(){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    // Clear the canvas completely (we render our own trail as stacked digits)
     ctx.clearRect(0, 0, W, H);
 
-    // keep dim region accurate
+    // recompute content bounds occasionally (small cost, keeps it correct)
     const wrap = document.querySelector('.page-wrapper');
     if (wrap){
       const r2 = wrap.getBoundingClientRect();
@@ -87,22 +95,28 @@ window.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < columns; i++){
       const x = skipLeft + i * fontSize;
 
+      // dim when over the resume column for readability
       const overContent = (x >= contentBounds.left && x <= contentBounds.right);
       const dimFactor = overContent ? 0.35 : 1.0;
 
-      // vertical stack (head + light trail)
+      // draw a vertical stack of digits (head + fading tail)
       for (let k = 0; k < trailLen; k++){
         const y = (drops[i] - k) * fontSize;
         if (y < -fontSize || y > H) continue;
 
+        // alternating 0/1 down the column
         const ch = ((Math.floor(drops[i]) - k) % 2 === 0) ? '0' : '1';
-        const alpha = Math.max(0, 1 - k/(trailLen + 2)) * dimFactor;
 
+        // head brighter, tail fades
+        const alpha = Math.max(0, 1 - k/(trailLen + 2)) * dimFactor;
         ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${alpha})`;
         ctx.fillText(ch, x, y);
       }
 
+      // advance the column
       drops[i] += baseSpeed + Math.random() * varSpeed;
+
+      // reset after fully off-screen + tail
       if (drops[i] * fontSize > H + trailLen * fontSize){
         drops[i] = -Math.random() * 20;
       }
