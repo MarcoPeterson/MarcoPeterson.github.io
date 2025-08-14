@@ -39,9 +39,11 @@ window.addEventListener('DOMContentLoaded', event => {
                    .getPropertyValue('--matrix').trim() || '#00FF41';
 
   // DRAMATIC slow-down controls
-  const baseSpeed = 0.05;                // << super slow
-  const varSpeed  = 0.10;                // randomness around base
-  const trailFade = 0.06;                // lower = longer trails
+  const baseSpeed = 0.06;   // was 0.12
+  const varSpeed  = 0.06;   // was 0.10
+  const trailFade = 0.04;   // lower -> longer trails
+  let fontSize = 20;        // slightly bigger glyphs (slower columns)
+               // lower = longer trails
 
   function hexToRgb(hex){
     const c = hex.replace('#','');
