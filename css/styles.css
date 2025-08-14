@@ -1,44 +1,34 @@
-/* ---- Matrix background for Jekyll Minimal ---- */
-:root { --matrix: #00FF41; }              /* Matrix green */
+/* =========================================================
+   Matrix 0/1 Rain for Jekyll Minimal (NO TRAILS)
+   Minimal, theme-safe CSS that won't fight your layout.
+   ========================================================= */
 
-html, body { height: 100%; }
-body { background: #0b1020; }
+/* Matrix green (used by the JS) */
+:root { --matrix: #00FF41; }
 
-/* Soft animated gradient behind the canvas (optional) */
-body::before{
-  content:"";
-  position: fixed; inset: 0;
-  background:
-    radial-gradient(1000px 700px at 15% 20%, rgba(123,97,255,.20), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.30), transparent 60%),
-    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.12), transparent 60%),
-    linear-gradient(120deg, #080c1a, #0b1020 40%, #0c1022 60%, #080c1a);
-  z-index: 0;
-  animation: floatGradient 40s linear infinite;
-  filter: saturate(110%);
-}
-
-/* The code-rain canvas sits above the gradient, below content */
+/* The canvas sits fixed behind your content */
 #bg-canvas{
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 0;            /* under content */
+  pointer-events: none;  /* don't block clicks */
+  opacity: 1;            /* solid */
+  mix-blend-mode: normal;/* no glow, no blend */
+}
+
+/* Ensure theme content renders above the canvas */
+.site-header,
+.site-footer,
+.page-content,
+.wrapper {
+  position: relative;
   z-index: 1;
-  pointer-events: none;
-  opacity: .55;
-  mix-blend-mode: screen;
 }
 
-/* Make the theme’s content sit above the background layers */
-.site-header, .site-footer, .wrapper { position: relative; z-index: 2; }
-
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce){
-  body::before { animation: none; }
-  #bg-canvas { display: none; }
-}
-
-/* Optional: gentle background motion */
-@keyframes floatGradient{
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
-  100%{transform: translate3d(0,0,0) scale(1); }
-}
+/* If you want a darker page with the rain behind it, you can
+   uncomment the lines below. Leaving them commented keeps the
+   Minimal theme's default white background and dark text. */
+/*
+html, body { height: 100%; }
+body { background: #0b1020; color: #e7ecf5; }
+*/
