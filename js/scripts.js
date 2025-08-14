@@ -1,5 +1,6 @@
 /*!
-* Start Bootstrap - Resume v7.0.4
+* Start Bootstrap - Resume v7.0.4 (https://startbootstrap.com/theme/resume)
+* MIT License
 */
 window.addEventListener('DOMContentLoaded', event => {
   // Activate Bootstrap scrollspy on the main nav element
