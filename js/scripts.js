@@ -30,8 +30,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // Visual tuning
   const CELL       = 18;          // font size + column width
   const TAIL       = 14;          // number of glyphs per column (vertical line)
-  const SPD_MIN    = 42;          // px/sec  (was 28)  -> 1.5× faster
-  const SPD_MAX    = 82.5;        // px/sec  (was 55)  -> 1.5× faster
+  const SPD_MIN    = 55;          // px/sec  (was 28)  -> 1.5× faster
+  const SPD_MAX    = 90;        // px/sec  (was 55)  -> 1.5× faster
   const SWITCH_MIN = 1400;        // ms between 0↔1 toggle at head (slower)
   const SWITCH_MAX = 2800;
 
