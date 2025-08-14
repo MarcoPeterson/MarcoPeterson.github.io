@@ -12,7 +12,7 @@
   --card:  rgba(255,255,255,.08);
   --card-border: rgba(255,255,255,.15);
   --shadow: 0 10px 30px rgba(0,0,0,.30);
-  --sidebar-w: 18.5rem;         /* left pane width */
+  --sidebar-w: 18.5rem;
 }
 
 /* ---------- Base ---------- */
@@ -43,7 +43,7 @@ body::before{
 /* matrix canvas */
 #bg-canvas{
   position: fixed; inset: 0;
-  z-index: 1;                /* below content */
+  z-index: 1;
   pointer-events: none;
   mix-blend-mode: screen;
 }
@@ -52,7 +52,7 @@ body::before{
 .page-wrapper{ 
   position: relative; 
   z-index: 3;
-  margin-left: calc(var(--sidebar-w) + 0.25rem);  /* a touch farther left initially */
+  margin-left: calc(var(--sidebar-w) + 0.25rem);
 }
 
 /* ---------- Left Pane ---------- */
@@ -64,34 +64,49 @@ body::before{
   box-shadow: var(--shadow);
   border-right: 1px solid rgba(255,255,255,.12);
   z-index: 5;
+
+  /* center photo + buttons as a group */
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1.25rem;
   padding: 1.25rem 1rem;
-  display: flex; flex-direction: column; align-items: center; gap: 1rem;
 }
 
 #sideNav .navbar-brand{
-  display: flex; flex-direction: column; align-items: center; gap: .75rem;
-  text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+  margin-bottom: .25rem;
 }
 .img-profile{ width: 6.5rem; height: 6.5rem; object-fit: cover; border: 3px solid rgba(255,255,255,.3); }
 
-#sideNav .navbar-nav{
-  display: flex; flex-direction: column; align-items: center; gap: .5rem;
-  margin-top: .5rem;
+#sideNav .navbar-collapse{
+  display:flex !important; flex-direction: column; align-items: center;
 }
 
-/* flamey nav pills */
+/* Navigation stack (About / Experience / ...) */
+.nav-stack{
+  display: flex; flex-direction: column; align-items: center;
+  gap: .6rem; padding: 0; margin: 0;
+}
+
+/* Neon/Glow pills (with flame aura on hover) */
 .nav-pill{
   position: relative;
   display: inline-block;
-  padding: .45rem 1.1rem;
+  padding: .50rem 1.15rem;
   border-radius: 999px;
   color: #f1f5ff !important;
-  background: linear-gradient(135deg, rgba(123,97,255,.25), rgba(13,110,253,.25));
+  background: linear-gradient(135deg, rgba(123,97,255,.22), rgba(13,110,253,.22));
+  border: 1px solid rgba(180,200,255,.25);
   text-decoration: none;
-  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
-  box-shadow: 0 8px 22px rgba(13,110,253,.25);
+  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease, background .2s ease;
+  box-shadow: 0 0 12px rgba(123,97,255,.25), 0 8px 22px rgba(13,110,253,.25);
+  text-shadow: 0 0 10px rgba(255,255,255,.12);
 }
-.nav-pill:hover{ transform: translateY(-1px); opacity: .98; text-decoration: none; }
+.nav-pill:hover{
+  transform: translateY(-1px);
+  opacity: .98;
+  background: linear-gradient(135deg, rgba(123,97,255,.32), rgba(13,110,253,.32));
+  text-decoration: none;
+}
 .nav-pill::after{
   content:""; position:absolute; inset:-8px; border-radius: 999px;
   background:
@@ -107,38 +122,7 @@ body::before{
   transition: opacity .2s, transform .2s;
   pointer-events: none;
 }
-.nav-pill:hover::after{
-  opacity: 1; transform: scale(1);
-  animation: flame 1.2s linear infinite;
-}
-
-/* social icons (right below nav pills) */
-.social-icons a{
-  position: relative;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 2.75rem; height: 2.75rem; border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color: #fff; margin-right: .4rem;
-  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
-  box-shadow: 0 8px 22px rgba(13,110,253,.35);
-}
-.social-icons a:hover{ transform: translateY(-2px) scale(1.04); opacity: .98; }
-.social-icons a::after{
-  content:""; position:absolute; inset:-8px; border-radius:50%;
-  background:
-    conic-gradient(from 0deg at 50% 60%,
-      rgba(255,200,0,0) 0%,
-      rgba(255,150,0,.5) 20%,
-      rgba(255,80,0,.65) 40%,
-      rgba(255,0,0,.6) 60%,
-      rgba(255,120,0,.5) 80%,
-      rgba(255,200,0,0) 100%);
-  filter: blur(8px);
-  opacity: 0; transform: scale(.85);
-  transition: opacity .2s, transform .2s;
-  pointer-events: none;
-}
-.social-icons a:hover::after{ opacity: 1; transform: scale(1); animation: flame 1.2s linear infinite; }
+.nav-pill:hover::after{ opacity: 1; transform: scale(1); animation: flame 1.2s linear infinite; }
 
 /* ---------- Sections / Typography ---------- */
 .resume-section{ padding: 3rem 1.25rem; scroll-margin-top: 1.5rem; }
@@ -151,11 +135,9 @@ h1, h2, h3, h4, h5 {
 }
 .hero-name{ font-weight: 900; line-height: 1.05; font-size: clamp(3.4rem, 5.6vw, 5.2rem); }
 h2{ font-weight: 800; }
-.resume-section h3{ font-weight: 800; } /* job titles bold */
+.resume-section h3{ font-weight: 800; }
 
 .lead{ color: #c7d0db; }
-
-/* dates bigger + bold */
 .date-strong{ font-weight: 800; font-size: 1.2rem; }
 
 .text-primary { color: var(--brand) !important; }
