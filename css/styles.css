@@ -1,34 +1,219 @@
 /* =========================================================
-   Matrix 0/1 Rain for Jekyll Minimal (NO TRAILS)
-   Minimal, theme-safe CSS that won't fight your layout.
+   Marco/Portfolio Styles — animated gradient + code rain
+   Bootstrap 5 + Raleway/Nunito
    ========================================================= */
 
-/* Matrix green (used by the JS) */
-:root { --matrix: #00FF41; }
-
-/* The canvas sits fixed behind your content */
-#bg-canvas{
-  position: fixed;
-  inset: 0;
-  z-index: 0;            /* under content */
-  pointer-events: none;  /* don't block clicks */
-  opacity: 1;            /* solid */
-  mix-blend-mode: normal;/* no glow, no blend */
+/* ---------- Theme Variables ---------- */
+:root{
+  --brand: #0d6efd;            /* primary accent for UI */
+  --brand-2: #7b61ff;
+  --matrix: #00FF41;           /* Matrix green for code rain */
+  --text:  #e7ecf5;            /* body text on dark */
+  --muted: #a9b1bb;
+  --bg:    #0b1020;
+  --card:  rgba(255,255,255,.08);
+  --card-border: rgba(255,255,255,.15);
+  --glass: rgba(13,17,27,.6);
+  --shadow: 0 10px 30px rgba(0,0,0,.30);
 }
 
-/* Ensure theme content renders above the canvas */
-.site-header,
-.site-footer,
-.page-content,
-.wrapper {
-  position: relative;
-  z-index: 1;
-}
-
-/* If you want a darker page with the rain behind it, you can
-   uncomment the lines below. Leaving them commented keeps the
-   Minimal theme's default white background and dark text. */
-/*
+/* ---------- Global / Base ---------- */
 html, body { height: 100%; }
-body { background: #0b1020; color: #e7ecf5; }
-*/
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Nunito", "Muli", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Animated gradient layer behind the canvas */
+body::before{
+  content:"";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.25), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.35), transparent 60%),
+    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.15), transparent 60%),
+    linear-gradient(120deg, #080c1a, #0b1020 40%, #0c1022 60%, #080c1a);
+  filter: saturate(110%);
+  animation: floatGradient 40s linear infinite;
+  z-index: 0;
+}
+
+/* Code-rain canvas above gradient, below content */
+#bg-canvas{
+  position: fixed; inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .55;                 /* subtle glow */
+  mix-blend-mode: screen;
+}
+
+/* Content above background layers */
+.container-fluid, .navbar { position: relative; z-index: 2; }
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  body::before { animation: none; }
+  #bg-canvas    { display: none; }
+}
+
+/* ---------- Headings ---------- */
+h1, h2, h3, h4, h5 {
+  font-family: "Raleway", "Saira Extra Condensed", sans-serif;
+  letter-spacing: .3px;
+  margin-bottom: .75rem;
+  color: #f3f5f7;
+}
+h1 { font-weight: 900; line-height: 1.1; }
+h2 { font-weight: 800; }
+/* Make job titles bold */
+.resume-section h3 { font-weight: 800; }
+
+/* Dates on the right: bold */
+.resume-section .flex-shrink-0 .text-primary { font-weight: 700; }
+.text-primary { color: var(--brand) !important; }
+
+.lead { color: #c7d0db; font-weight: 400; }
+.muted { color: var(--muted); }
+
+/* Links */
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:not(.btn):not(.social-icon){
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size .2s ease;
+}
+a:not(.btn):not(.social-icon):hover{
+  text-decoration: none;
+  background-size: 100% 2px;
+}
+
+/* Separator */
+hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
+
+/* =========================================================
+   TOP HORIZONTAL NAV (instead of left sidebar)
+   ========================================================= */
+.navbar#sideNav {
+  width: 100%;
+  position: fixed; top: 0; left: 0; right: 0;
+  height: auto;
+  background: var(--glass) !important;  /* glass bar */
+  backdrop-filter: blur(8px) saturate(140%);
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  z-index: 10;
+}
+.container-fluid {           /* push content below bar */
+  padding-top: 4.25rem;
+}
+.navbar-dark .navbar-nav { flex-direction: row; gap: 1rem; }
+.navbar-dark .navbar-nav .nav-link { color: #e7ecf5; }
+.navbar-dark .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
+.navbar-brand .img-profile { max-width: 3rem; border: 2px solid rgba(255,255,255,.25); }
+@media (max-width: 991.98px){
+  .navbar-dark .navbar-nav { flex-direction: column; gap: 0; }
+}
+
+/* Sections */
+.resume-section { padding: 3rem 1.25rem; scroll-margin-top: 6rem; }
+.resume-section .resume-section-content { max-width: 1000px; }
+@media (min-width: 992px) {
+  .resume-section { padding: 4rem 3rem; }
+}
+
+/* ---------- ABOUT ---------- */
+#about .subheading a { color: #e7ecf5; }
+#about .lead { font-size: 1.06rem; }
+
+/* ---------- SOCIAL ICONS + flame hover ---------- */
+.social-icons a {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 3rem; height: 3rem; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fff; margin-right: .5rem;
+  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+  box-shadow: 0 8px 22px rgba(13,110,253,.35);
+}
+.social-icons a:hover { transform: translateY(-2px) scale(1.04); opacity: .98; }
+/* Flame aura */
+.social-icons a::after{
+  content:""; position:absolute; inset:-8px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg at 50% 60%,
+      rgba(255,200,0,0) 0%,
+      rgba(255,150,0,.5) 20%,
+      rgba(255,80,0,.65) 40%,
+      rgba(255,0,0,.6) 60%,
+      rgba(255,120,0,.5) 80%,
+      rgba(255,200,0,0) 100%);
+  filter: blur(8px);
+  opacity: 0; transform: scale(.85);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.social-icons a:hover::after{
+  opacity: 1; transform: scale(1);
+  animation: flame 1.2s linear infinite;
+}
+@keyframes flame {
+  from { transform: scale(1) rotate(0deg); }
+  to   { transform: scale(1.02) rotate(360deg); }
+}
+
+/* ---------- Lists / subheadings ---------- */
+/* Make ALL list items pure white for contrast */
+.resume-section ul { padding-left: 1.1rem; }
+.resume-section li { color: #fff; }
+.resume-section li + li { margin-top: .4rem; }
+.resume-section .subheading { color: #c7d0db; font-weight: 600; }
+
+/* ---------- Cards (Projects) ---------- */
+#projects .card {
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border-radius: .9rem;
+  backdrop-filter: blur(6px);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+#projects .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  border-color: rgba(123,97,255,.35);
+}
+#projects .card .card-body { padding: 1.75rem; }
+#projects .card-title { margin-bottom: .5rem; color: #f5f7fa; }
+#projects .btn { border-radius: .55rem; }
+
+/* ---------- Tables ---------- */
+.table { font-size: .95rem; color: #e8eef6; }
+.table thead th { border-bottom-width: 2px; }
+
+/* ---------- Buttons ---------- */
+.btn-primary { border-color: transparent; background-image: linear-gradient(135deg, var(--brand), var(--brand-2)); }
+.btn-primary:hover { filter: brightness(.96); }
+
+/* ---------- Keyframes ---------- */
+@keyframes floatGradient {
+  0% { transform: translate3d(0,0,0) scale(1); }
+  50%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
+  100%{transform: translate3d(0,0,0) scale(1); }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  .navbar { display: none !important; }
+  .container-fluid { padding-top: 0 !important; }
+  .resume-section { padding: 1rem !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; }
+}
