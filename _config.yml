@@ -1,19 +1,19 @@
-# Use ONE of these theme lines (remote_theme is recommended):
+# Set theme
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
   - jekyll-remote-theme
 
-# Site meta
 title: Marco Peterson
-description: Data Scientist — forecasting, segmentation, and predictive analytics
+description: Data Scientist — forecasting, segmentation, predictive analytics
 author: Marco Peterson
 
-# Google Analytics (set your own GA4 ID or remove)
-google_analytics: G-XXXXXXXXXX
+# (optional) Google Analytics
+# google_analytics: G-XXXXXXX
 
 # Social
 social-network-links:
   email: "mapeterson3@outlook.com"
-  linkedin: "marco-peterson-5b1b63148"
-  github: "MarcoPeterson"
+  linkedin: marco-peterson-5b1b63148
+  github: MarcoPeterson
 
+theme: jekyll-theme-minimal
