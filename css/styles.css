@@ -48,12 +48,12 @@ body::before{
   position: fixed; inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: .55;                 /* subtle glow */
+  opacity: .55;                 /* a touch brighter for “Matrix” */
   mix-blend-mode: screen;
 }
 
 /* Content above background layers */
-.container-fluid, .navbar { position: relative; z-index: 2; }
+#site-topbar, .container-fluid { position: relative; z-index: 2; }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce){
@@ -101,7 +101,7 @@ hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 /* =========================================================
    TOP HORIZONTAL NAV (instead of left sidebar)
    ========================================================= */
-.navbar#sideNav {
+.navbar#sideNav {            /* reuse existing markup/id */
   width: 100%;
   position: fixed; top: 0; left: 0; right: 0;
   height: auto;
@@ -212,7 +212,7 @@ hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 
 /* ---------- Print ---------- */
 @media print {
-  .navbar { display: none !important; }
+  #sideNav { display: none !important; }
   .container-fluid { padding-top: 0 !important; }
   .resume-section { padding: 1rem !important; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; }
