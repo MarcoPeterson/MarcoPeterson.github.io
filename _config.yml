@@ -1,22 +1,19 @@
-# Set theme
+# Use ONE of these theme lines (remote_theme is recommended):
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
-- jekyll-remote-theme
+  - jekyll-remote-theme
 
-# Name of Site
-title: Allie Bergmann
-description: Data Scientist, Stock/Crypto Algorithmic Trading Enthusiast
+# Site meta
+title: Marco Peterson
+description: Data Scientist — forecasting, segmentation, and predictive analytics
+author: Marco Peterson
 
-# Your name to show in the footer
-author: Allison Bergmann
+# Google Analytics (set your own GA4 ID or remove)
+google_analytics: G-XXXXXXXXXX
 
-# Google Analytics
-google_analytics: G-KM29CNVYG4
-
-# Contact/Social Media
+# Social
 social-network-links:
-  email: "11arbergmann@gmail.com"
-  linkedin: arbergmann
-  github: arbergmann
+  email: "mapeterson3@outlook.com"
+  linkedin: "marco-peterson-5b1b63148"
+  github: "MarcoPeterson"
 
-theme: jekyll-theme-minimal
