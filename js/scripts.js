@@ -6,10 +6,7 @@ window.addEventListener('DOMContentLoaded', event => {
   // Activate Bootstrap scrollspy on the main nav element
   const sideNav = document.body.querySelector('#sideNav');
   if (sideNav) {
-    new bootstrap.ScrollSpy(document.body, {
-      target: '#sideNav',
-      offset: 74,
-    });
+    new bootstrap.ScrollSpy(document.body, { target: '#sideNav', offset: 74 });
   }
 
   // Collapse responsive navbar when toggler is visible
@@ -27,21 +24,23 @@ window.addEventListener('DOMContentLoaded', event => {
 });
 
 /* ================== Code Rain Background (Matrix) ================== */
-(function(){
+(function initMatrix(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { alpha: true });
+
   let W, H, columns, drops;
-  let fontSize = 18;                     // slightly larger glyphs
+  let fontSize = 20;                 // ONE declaration only
+
   const chars = "01";
   const matrix = getComputedStyle(document.documentElement)
                    .getPropertyValue('--matrix').trim() || '#00FF41';
 
-  // DRAMATIC slow-down controls
-  const baseSpeed = 0.12;                // << super slow
-  const varSpeed  = 0.10;                // randomness around base
-  const trailFade = 0.06;                // lower = longer trails
+  // Dramatically slow descent + long trails
+  const baseSpeed = 0.06;            // super slow
+  const varSpeed  = 0.06;            // small randomness
+  const trailFade = 0.04;            // lower -> longer trails
 
   function hexToRgb(hex){
     const c = hex.replace('#','');
@@ -54,10 +53,9 @@ window.addEventListener('DOMContentLoaded', event => {
     const ratio = window.devicePixelRatio || 1;
     W = canvas.width  = Math.floor(window.innerWidth  * ratio);
     H = canvas.height = Math.floor(window.innerHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);  // draw in CSS pixels
     columns = Math.ceil(window.innerWidth / fontSize);
-    // start many streams off-screen for staggered entry
-    drops = new Array(columns).fill(0).map(() => -Math.random() * 80);
+    drops = new Array(columns).fill(0).map(() => -Math.random() * 80); // start above
     ctx.font = `${fontSize}px monospace`;
   }
 
@@ -76,11 +74,9 @@ window.addEventListener('DOMContentLoaded', event => {
       ctx.fillStyle = `rgba(${matrixRgb}, 0.95)`;
       ctx.fillText(text, x, y);
 
-      // reset stream occasionally after it leaves the screen
-      if (y > H && Math.random() > 0.995) drops[i] = -Math.random() * 20;
+      if (y > H && Math.random() > 0.995) drops[i] = -Math.random() * 20; // occasional reset
 
-      // VERY SLOW descent
-      drops[i] += baseSpeed + Math.random() * varSpeed; // ~0.12–0.22 px per frame
+      drops[i] += baseSpeed + Math.random() * varSpeed; // VERY slow descent
     }
     requestAnimationFrame(draw);
   }
