@@ -4,128 +4,143 @@
 */
 window.addEventListener('DOMContentLoaded', () => {
   // Activate Bootstrap scrollspy on the main nav element
-  const sideNav = document.querySelector('#sideNav');
+  const sideNav = document.body.querySelector('#sideNav');
   if (sideNav) {
-    new bootstrap.ScrollSpy(document.body, {
-      target: '#sideNav',
-      offset: 80,
-    });
+    new bootstrap.ScrollSpy(document.body, { target: '#sideNav', offset: 74 });
   }
 
-  // Collapse responsive navbar when toggler is visible
-  const navbarToggler = document.querySelector('.navbar-toggler');
-  const responsiveNavItems = [].slice.call(
-    document.querySelectorAll('#navbarResponsive .nav-link')
-  );
-  responsiveNavItems.map((responsiveNavItem) => {
-    responsiveNavItem.addEventListener('click', () => {
-      if (window.getComputedStyle(navbarToggler).display !== 'none') {
-        navbarToggler.click();
-      }
+  // Collapse responsive navbar when toggler is visible (mobile)
+  const navbarToggler = document.body.querySelector('.navbar-toggler');
+  const responsiveNavItems = [].slice.call(document.querySelectorAll('#navbarResponsive .nav-link'));
+  responsiveNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.getComputedStyle(navbarToggler).display !== 'none') navbarToggler.click();
     });
   });
 });
 
-/* ================== Matrix Code Rain (0/1 columns) ================== */
+/* ================== Matrix 0/1 Streams (slow, behind content, dim over text) ================== */
 (function(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d', { alpha: true });
-  ctx.textBaseline = 'top';
 
-  // Tunables
-  let fontSize = 18;                 // glyph size
-  const trailLen = 12;               // digits per column (visual trail)
-  let baseSpeed = 0.22;              // a bit faster per your ask
-  let varSpeed  = 0.12;              // randomness per column
-  const color   = [0, 255, 65];      // matrix green
+  const ctx  = canvas.getContext('2d', { alpha: true });
+  const DPR  = Math.max(1, window.devicePixelRatio || 1);
 
-  // Layout
-  let W = 0, H = 0, columns = 0, drops = [];
-  let skipLeft = 0;                  // pixels to skip (left pane)
-  let contentBounds = { left: 0, right: 0 }; // to dim over resume text
+  // Visual tuning
+  const CELL       = 18;          // font size + column width
+  const TAIL       = 14;          // number of glyphs per column (vertical line)
+  const SPD_MIN    = 28;          // px/sec  (slow)
+  const SPD_MAX    = 55;          // px/sec
+  const SWITCH_MIN = 1400;        // ms between 0↔1 toggle at head (slower)
+  const SWITCH_MAX = 2800;
 
-  function updateBounds(){
-    const ratio = window.devicePixelRatio || 1;
-    canvas.width  = Math.floor(window.innerWidth  * ratio);
-    canvas.height = Math.floor(window.innerHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);  // draw in CSS pixels
-    W = window.innerWidth;
-    H = window.innerHeight;
+  const COLOR      = [0, 255, 65];  // Matrix green
+  const HEAD_A     = 0.95;          // head alpha
+  const TRAIL_A0   = 0.18;          // first trail alpha (light)
+  const TRAIL_DA   = 0.012;         // alpha falloff per glyph
 
-    // left pane width (don't draw under it)
-    const side = document.getElementById('sideNav');
-    if (side){
-      const r = side.getBoundingClientRect();
-      skipLeft = Math.ceil(r.right);
-    } else {
-      skipLeft = 0;
-    }
+  let W, H, COLS, streams = [];
+  let lastT = performance.now();
+  let contentRectCss = null; // updated on resize/scroll
 
-    // content bounds to reduce visibility over text
-    const wrap = document.querySelector('.page-wrapper');
-    if (wrap){
-      const r2 = wrap.getBoundingClientRect();
-      contentBounds.left  = Math.floor(r2.left);
-      contentBounds.right = Math.floor(r2.right);
-    } else {
-      contentBounds.left = skipLeft;
-      contentBounds.right = W;
-    }
+  function cssSize(el){ return { w: el.clientWidth, h: el.clientHeight }; }
 
-    columns = Math.max(1, Math.floor((W - skipLeft) / fontSize));
-    drops = new Array(columns).fill(0).map(() => -Math.random()*20);
-    ctx.font = `${fontSize}px monospace`;
+  function updateContentRect(){
+    const container = document.querySelector('.container-fluid');
+    if (!container) return;
+    const r = container.getBoundingClientRect();
+    const c = canvas.getBoundingClientRect();
+    // Convert to canvas CSS coordinates
+    contentRectCss = {
+      left:  r.left  - c.left,
+      top:   r.top   - c.top,
+      right: r.right - c.left,
+      bottom:r.bottom- c.top
+    };
   }
 
-  function draw(){
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function layout(){
+    const { w, h } = cssSize(canvas);
+    W = canvas.width  = Math.max(1, Math.floor(w * DPR));
+    H = canvas.height = Math.max(1, Math.floor(h * DPR));
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    // Clear the canvas completely (we render our own trail as stacked digits)
+    COLS = Math.ceil(w / CELL);
+    streams = new Array(COLS).fill(0).map((_, i) => ({
+      x: i * CELL + CELL/2,
+      y: -Math.random() * h,
+      speed: SPD_MIN + Math.random() * (SPD_MAX - SPD_MIN),
+      // head value toggles slowly; entire stream alternates 0/1 downwards
+      headVal: Math.random() < 0.5 ? 0 : 1,
+      lastSwitch: performance.now(),
+      switchEvery: SWITCH_MIN + Math.random() * (SWITCH_MAX - SWITCH_MIN),
+    }));
+
+    ctx.font = `${CELL}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    updateContentRect();
+  }
+
+  function dimFactor(x, y){
+    // reduce visibility over the resume content so text is readable
+    if (!contentRectCss) return 1;
+    if (x >= contentRectCss.left && x <= contentRectCss.right &&
+        y >= contentRectCss.top  && y <= contentRectCss.bottom) {
+      return 0.35; // dim inside content area
+    }
+    return 1;
+  }
+
+  function frame(t){
+    const dt = Math.min(120, t - lastT) / 1000; // seconds
+    lastT = t;
+
+    // Clear completely so no residue/afterglow remains
     ctx.clearRect(0, 0, W, H);
 
-    // recompute content bounds occasionally (small cost, keeps it correct)
-    const wrap = document.querySelector('.page-wrapper');
-    if (wrap){
-      const r2 = wrap.getBoundingClientRect();
-      contentBounds.left  = Math.floor(r2.left);
-      contentBounds.right = Math.floor(r2.right);
-    }
+    const cssH = canvas.clientHeight;
 
-    for (let i = 0; i < columns; i++){
-      const x = skipLeft + i * fontSize;
-
-      // dim when over the resume column for readability
-      const overContent = (x >= contentBounds.left && x <= contentBounds.right);
-      const dimFactor = overContent ? 0.35 : 1.0;
-
-      // draw a vertical stack of digits (head + fading tail)
-      for (let k = 0; k < trailLen; k++){
-        const y = (drops[i] - k) * fontSize;
-        if (y < -fontSize || y > H) continue;
-
-        // alternating 0/1 down the column
-        const ch = ((Math.floor(drops[i]) - k) % 2 === 0) ? '0' : '1';
-
-        // head brighter, tail fades
-        const alpha = Math.max(0, 1 - k/(trailLen + 2)) * dimFactor;
-        ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${alpha})`;
-        ctx.fillText(ch, x, y);
+    streams.forEach(s => {
+      // slow 0↔1 toggling at the head only
+      if (t - s.lastSwitch > s.switchEvery){
+        s.headVal = s.headVal ? 0 : 1;
+        s.lastSwitch = t;
+        s.switchEvery = SWITCH_MIN + Math.random() * (SWITCH_MAX - SWITCH_MIN);
       }
 
-      // advance the column
-      drops[i] += baseSpeed + Math.random() * varSpeed;
+      // advance head
+      s.y += s.speed * dt;
 
-      // reset after fully off-screen + tail
-      if (drops[i] * fontSize > H + trailLen * fontSize){
-        drops[i] = -Math.random() * 20;
+      // wrap
+      if (s.y > cssH + TAIL * CELL){
+        s.y = -Math.random() * cssH;
       }
-    }
 
-    requestAnimationFrame(draw);
+      // Draw from head downward (alternating 0/1 vertically)
+      for (let k = 0; k < TAIL; k++){
+        const y = s.y - k * CELL;
+        if (y < -CELL || y > cssH + CELL) continue;
+
+        const val = ((s.headVal + k) % 2); // 0/1 alternating by row
+        const baseAlpha = k === 0 ? HEAD_A : Math.max(0, TRAIL_A0 - k * TRAIL_DA);
+        const alpha = baseAlpha * dimFactor(s.x, y);
+
+        if (alpha <= 0.001) continue;
+
+        ctx.shadowColor = `rgba(${COLOR.join(',')},${k===0?0.5:0})`;
+        ctx.shadowBlur  = k===0 ? 6 : 0;
+        ctx.fillStyle   = `rgba(${COLOR.join(',')},${alpha})`;
+        ctx.fillText(val.toString(), s.x, y);
+      }
+    });
+
+    requestAnimationFrame(frame);
   }
 
-  window.addEventListener('resize', updateBounds);
-  updateBounds();
-  requestAnimationFrame(draw);
+  window.addEventListener('resize', () => { layout(); });
+  window.addEventListener('scroll',  () => { updateContentRect(); });
+  layout();
+  requestAnimationFrame(frame);
 })();
