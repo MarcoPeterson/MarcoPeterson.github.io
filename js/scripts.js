@@ -1,72 +1,91 @@
-/* =========================================================
-   Matrix 0/1 Rain (NO TRAILS, DENSE, SLOW)
-   Works anywhere as long as a <canvas id="bg-canvas"> exists.
-   ========================================================= */
+/*!
+* Start Bootstrap - Resume v7.0.4
+* MIT License
+*/
+window.addEventListener('DOMContentLoaded', event => {
+  // Activate Bootstrap scrollspy on the main nav element
+  const sideNav = document.body.querySelector('#sideNav');
+  if (sideNav) {
+    new bootstrap.ScrollSpy(document.body, {
+      target: '#sideNav',
+      offset: 74,
+    });
+  }
+
+  // Collapse responsive navbar when toggler is visible
+  const navbarToggler = document.body.querySelector('.navbar-toggler');
+  const responsiveNavItems = [].slice.call(
+    document.querySelectorAll('#navbarResponsive .nav-link')
+  );
+  responsiveNavItems.map(function (responsiveNavItem) {
+    responsiveNavItem.addEventListener('click', () => {
+      if (window.getComputedStyle(navbarToggler).display !== 'none') {
+        navbarToggler.click();
+      }
+    });
+  });
+});
+
+/* ================== Code Rain Background (Matrix, SLOW) ================== */
 (function initMatrix(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { alpha: true });
 
-  // ---- Tunables ----
-  let fontSize = 18;                  // 0/1 glyph size in CSS pixels
-  const densityBoost = 0.70;          // < 1.0 => MORE columns (0.70 ≈ +43%)
-  const baseSpeed = 0.06;             // very slow descent
-  const varSpeed  = 0.06;             // slight per-column randomness
+  let W, H, columns, drops;
+  let fontSize = 20;                 // glyph size
 
-  // Only 0/1 characters, repeated to avoid string bounds branching
-  const chars = "0101010101001010010110010101010010100101100101";
+  const chars = "01";
+  const matrix = getComputedStyle(document.documentElement)
+                   .getPropertyValue('--matrix').trim() || '#00FF41';
 
-  // Matrix green from CSS variable (fallback if missing)
-  const cssMatrix = getComputedStyle(document.documentElement)
-                      .getPropertyValue('--matrix').trim();
-  const color = cssMatrix || '#00FF41';
+  // Dramatically slow + long trails
+  const baseSpeed = 0.06;            // super slow
+  const varSpeed  = 0.06;            // small randomness
+  const trailFade = 0.04;            // lower -> longer trails
 
-  let W, H, columns, drops, speeds;
+  function hexToRgb(hex){
+    const c = hex.replace('#','');
+    const b = c.length === 3 ? c.split('').map(v=>v+v).join('') : c;
+    const r = parseInt(b.substr(0,2),16);
+    const g = parseInt(b.substr(2,2),16);
+    const bl = parseInt(b.substr(4,2),16);
+    return `${r},${g},${bl}`;
+  }
+  const matrixRgb = hexToRgb(matrix);
 
   function resize(){
-    // Draw using CSS pixels while keeping a high-res canvas for HiDPI
     const ratio = window.devicePixelRatio || 1;
     W = canvas.width  = Math.floor(window.innerWidth  * ratio);
     H = canvas.height = Math.floor(window.innerHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-    // More columns by using a smaller effective column width
-    const colWidth = fontSize * densityBoost;
-    columns = Math.max(1, Math.ceil(window.innerWidth / colWidth));
-
-    // Each column has its own vertical position and speed
-    drops  = Array.from({length: columns}, () => -Math.random() * 40);
-    speeds = Array.from({length: columns}, () => baseSpeed + Math.random() * varSpeed);
-
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);  // draw in CSS pixels
+    columns = Math.ceil(window.innerWidth / fontSize);
+    // start many streams off-screen for staggered entry
+    drops = new Array(columns).fill(0).map(() => -Math.random() * 80);
     ctx.font = `${fontSize}px monospace`;
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = color;
   }
 
   function draw(){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // ****** NO TRAILS: clear every frame ******
-    ctx.clearRect(0, 0, W, H);
-
-    const colWidth = fontSize * densityBoost;
+    // trailing fade (trail effect)
+    ctx.fillStyle = `rgba(0, 0, 0, ${trailFade})`;
+    ctx.fillRect(0, 0, W, H);
 
     for (let i = 0; i < columns; i++){
-      const x = Math.floor(i * colWidth);
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
       const y = drops[i] * fontSize;
 
-      // One crisp glyph per column
-      const ch = chars.charAt((Math.random() * chars.length) | 0);
-      ctx.fillText(ch, x, y);
+      ctx.fillStyle = `rgba(${matrixRgb}, 0.95)`;
+      ctx.fillText(text, x, y);
 
-      // Wrap with slight randomness
-      if (y > H && Math.random() > 0.98) {
-        drops[i]  = -Math.random() * 20;
-        speeds[i] = baseSpeed + Math.random() * varSpeed;
-      } else {
-        drops[i] += speeds[i];
-      }
+      // reset stream occasionally after it leaves the screen
+      if (y > H && Math.random() > 0.995) drops[i] = -Math.random() * 20;
+
+      // VERY SLOW descent
+      drops[i] += baseSpeed + Math.random() * varSpeed;
     }
     requestAnimationFrame(draw);
   }
