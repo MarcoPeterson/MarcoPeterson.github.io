@@ -1,23 +1,21 @@
 /* =========================================================
-   Marco / Portfolio Styles — Glass left sidebar + Matrix rain
+   Marco/Portfolio Styles — left pane + matrix bg
    ========================================================= */
 
-/* ---------- Theme Variables ---------- */
 :root{
   --brand: #0d6efd;
   --brand-2: #7b61ff;
-  --matrix: #00FF41;
+  --matrix: #00ff41;
   --text:  #e7ecf5;
   --muted: #a9b1bb;
   --bg:    #0b1020;
   --card:  rgba(255,255,255,.08);
   --card-border: rgba(255,255,255,.15);
-  --glass: rgba(13,17,27,.70);
   --shadow: 0 10px 30px rgba(0,0,0,.30);
-  --sidebar-w: 22rem;     /* desktop sidebar width */
+  --sidebar-w: 18.5rem;         /* left pane width */
 }
 
-/* ---------- Global / Base ---------- */
+/* ---------- Base ---------- */
 html, body { height: 100%; }
 html { scroll-behavior: smooth; }
 body {
@@ -28,137 +26,105 @@ body {
   -webkit-font-smoothing: antialiased;
   position: relative;
 }
-.container-fluid { position: relative; z-index: 2; }
 
-/* Animated gradient behind canvas */
+/* soft animated gradient behind canvas */
 body::before{
   content:"";
   position: fixed; inset: 0;
   background:
-    radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.22), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.28), transparent 60%),
-    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.12), transparent 60%),
+    radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.18), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.25), transparent 60%),
+    radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.10), transparent 60%),
     linear-gradient(120deg, #080c1a, #0b1020 40%, #0c1022 60%, #080c1a);
   animation: floatGradient 40s linear infinite;
   z-index: 0;
 }
-@keyframes floatGradient {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
-  100%{transform: translate3d(0,0,0) scale(1); }
-}
 
-/* Matrix canvas (always behind content) */
+/* matrix canvas */
 #bg-canvas{
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: 0;
+  position: fixed; inset: 0;
+  z-index: 1;                /* below content */
   pointer-events: none;
-  mix-blend-mode: normal;
+  mix-blend-mode: screen;
 }
 
-/* ---------- Left Sidebar ---------- */
+/* content wrapper */
+.page-wrapper{ 
+  position: relative; 
+  z-index: 3;
+  margin-left: calc(var(--sidebar-w) + 0.25rem);  /* a touch farther left initially */
+}
+
+/* ---------- Left Pane ---------- */
 #sideNav{
   width: var(--sidebar-w);
-  position: fixed; left: 0; top: 0; bottom: 0;
-  background: var(--glass) !important;
-  backdrop-filter: blur(8px) saturate(140%);
+  position: fixed; top: 0; left: 0; bottom: 0;
+  background: rgba(13,17,27,.62);
+  backdrop-filter: blur(10px) saturate(150%);
   box-shadow: var(--shadow);
-  border-right: 1px solid rgba(255,255,255,.10);
-  z-index: 10;
+  border-right: 1px solid rgba(255,255,255,.12);
+  z-index: 5;
+  padding: 1.25rem 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
 }
 
-/* Photo above menu */
-#sideNav .navbar-brand { display: block; text-align: center; padding: 1rem 1rem .5rem; }
-#sideNav .img-profile { max-width: 10.5rem; border: 3px solid rgba(255,255,255,.25); }
-
-/* Menu: horizontal, centered, wraps nicely */
-#sideNav .navbar-nav{
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: .35rem .9rem;
-  padding: .25rem 1rem 1rem;
-}
-#sideNav .navbar-nav .nav-link { color: #e7ecf5; padding: .25rem .35rem; }
-#sideNav .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
-
-/* Push main content to the right on desktop */
-@media (min-width: 992px){
-  .container-fluid { margin-left: var(--sidebar-w); padding-left: 1rem; padding-right: 1rem; }
-  #bg-canvas{ left: var(--sidebar-w); width: calc(100vw - var(--sidebar-w)); }
-}
-
-/* Mobile: sidebar becomes top bar */
-@media (max-width: 991.98px){
-  #sideNav{
-    width: 100%; height: auto; right: 0;
-    border-right: none; border-bottom: 1px solid rgba(255,255,255,.10);
-  }
-  #sideNav .img-profile{ display:none; }
-  .container-fluid { margin-left: 0; padding-top: 4.25rem; }
-  #bg-canvas{ left: 0; width: 100vw; }
-}
-
-/* ---------- Sections & Typography ---------- */
-.resume-section { padding: 3rem 1.25rem; scroll-margin-top: 5.5rem; }
-.resume-section .resume-section-content { max-width: 1000px; margin: 0 auto; }
-@media (min-width: 992px) { .resume-section { padding: 4rem 3rem; } }
-
-h1, h2, h3, h4, h5 {
-  font-family: "Raleway", "Saira Extra Condensed", sans-serif;
-  letter-spacing: .3px;
-  color: #f3f5f7;
-  margin-bottom: .75rem;
-}
-h1 { font-weight: 900; line-height: 1.1; }
-h2 { font-weight: 800; }
-.resume-section h3 { font-weight: 800; } /* job titles bold */
-
-/* Make your name ~2× larger */
-#about h1.mb-0{ font-size: clamp(2.4rem, 6.2vw, 4.8rem); }
-
-.text-primary { color: var(--brand) !important; }
-.lead { color: #c7d0db; font-weight: 400; }
-.muted { color: var(--muted); }
-
-hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
-
-/* Dates on the right: bigger + bolder */
-.resume-section .flex-shrink-0 .text-primary{
-  font-weight: 800;
-  font-size: 1.12rem;
-}
-
-/* ---------- Links ---------- */
-a { color: var(--brand); text-decoration: none; }
-a:hover { text-decoration: underline; }
-a:not(.btn):not(.social-icon){
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0% 2px;
-  transition: background-size .2s ease;
-}
-a:not(.btn):not(.social-icon):hover{
+#sideNav .navbar-brand{
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
   text-decoration: none;
-  background-size: 100% 2px;
+}
+.img-profile{ width: 6.5rem; height: 6.5rem; object-fit: cover; border: 3px solid rgba(255,255,255,.3); }
+
+#sideNav .navbar-nav{
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  margin-top: .5rem;
 }
 
-/* ---------- Social icons + flame hover ---------- */
-.social-icons a {
+/* flamey nav pills */
+.nav-pill{
+  position: relative;
+  display: inline-block;
+  padding: .45rem 1.1rem;
+  border-radius: 999px;
+  color: #f1f5ff !important;
+  background: linear-gradient(135deg, rgba(123,97,255,.25), rgba(13,110,253,.25));
+  text-decoration: none;
+  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+  box-shadow: 0 8px 22px rgba(13,110,253,.25);
+}
+.nav-pill:hover{ transform: translateY(-1px); opacity: .98; text-decoration: none; }
+.nav-pill::after{
+  content:""; position:absolute; inset:-8px; border-radius: 999px;
+  background:
+    conic-gradient(from 0deg at 50% 60%,
+      rgba(255,200,0,0) 0%,
+      rgba(255,150,0,.45) 20%,
+      rgba(255,80,0,.55) 40%,
+      rgba(255,0,0,.55) 60%,
+      rgba(255,120,0,.45) 80%,
+      rgba(255,200,0,0) 100%);
+  filter: blur(8px);
+  opacity: 0; transform: scale(.9);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.nav-pill:hover::after{
+  opacity: 1; transform: scale(1);
+  animation: flame 1.2s linear infinite;
+}
+
+/* social icons (right below nav pills) */
+.social-icons a{
   position: relative;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 3rem; height: 3rem; border-radius: 50%;
+  width: 2.75rem; height: 2.75rem; border-radius: 50%;
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color: #fff; margin-right: .5rem;
+  color: #fff; margin-right: .4rem;
   transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
   box-shadow: 0 8px 22px rgba(13,110,253,.35);
 }
-.social-icons a:hover { transform: translateY(-2px) scale(1.04); opacity: .98; }
+.social-icons a:hover{ transform: translateY(-2px) scale(1.04); opacity: .98; }
 .social-icons a::after{
-  content:""; position:absolute; inset:-8px; border-radius: 50%;
+  content:""; position:absolute; inset:-8px; border-radius:50%;
   background:
     conic-gradient(from 0deg at 50% 60%,
       rgba(255,200,0,0) 0%,
@@ -167,18 +133,39 @@ a:not(.btn):not(.social-icon):hover{
       rgba(255,0,0,.6) 60%,
       rgba(255,120,0,.5) 80%,
       rgba(255,200,0,0) 100%);
-  filter: blur(8px); opacity: 0; transform: scale(.85);
-  transition: opacity .2s, transform .2s; pointer-events: none;
+  filter: blur(8px);
+  opacity: 0; transform: scale(.85);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
 }
 .social-icons a:hover::after{ opacity: 1; transform: scale(1); animation: flame 1.2s linear infinite; }
-@keyframes flame { from { transform: scale(1) rotate(0); } to { transform: scale(1.02) rotate(360deg); } }
 
-/* ---------- Lists / Cards / Tables / Buttons ---------- */
-.resume-section ul { padding-left: 1.1rem; }
-.resume-section li { color: #fff; }
-.resume-section li + li { margin-top: .4rem; }
+/* ---------- Sections / Typography ---------- */
+.resume-section{ padding: 3rem 1.25rem; scroll-margin-top: 1.5rem; }
+.resume-section .resume-section-content{ max-width: 980px; }
 
-#projects .card {
+h1, h2, h3, h4, h5 {
+  font-family: "Raleway", "Saira Extra Condensed", sans-serif;
+  letter-spacing: .3px;
+  color: #f3f5f7;
+}
+.hero-name{ font-weight: 900; line-height: 1.05; font-size: clamp(3.4rem, 5.6vw, 5.2rem); }
+h2{ font-weight: 800; }
+.resume-section h3{ font-weight: 800; } /* job titles bold */
+
+.lead{ color: #c7d0db; }
+
+/* dates bigger + bold */
+.date-strong{ font-weight: 800; font-size: 1.2rem; }
+
+.text-primary { color: var(--brand) !important; }
+a{ color: var(--brand); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
+
+/* cards */
+#projects .card{
   border: 1px solid var(--card-border);
   background: var(--card);
   box-shadow: var(--shadow);
@@ -186,31 +173,25 @@ a:not(.btn):not(.social-icon):hover{
   backdrop-filter: blur(6px);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-#projects .card:hover {
+#projects .card:hover{
   transform: translateY(-4px);
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
   border-color: rgba(123,97,255,.35);
 }
 #projects .card .card-body { padding: 1.75rem; }
-#projects .card-title { margin-bottom: .5rem; color: #f5f7fa; }
-#projects .btn { border-radius: .55rem; }
 
-.table { font-size: .95rem; color: #e8eef6; }
-.table thead th { border-bottom-width: 2px; }
-
-.btn-primary { border-color: transparent; background-image: linear-gradient(135deg, var(--brand), var(--brand-2)); }
-.btn-primary:hover { filter: brightness(.96); }
-
-/* ---------- Reduce motion ---------- */
-@media (prefers-reduced-motion: reduce){
-  body::before { animation: none; }
-  #bg-canvas    { display: none; }
+/* animations */
+@keyframes flame { from { transform: scale(1) rotate(0deg);} to{transform: scale(1.02) rotate(360deg);} }
+@keyframes floatGradient {
+  0% { transform: translate3d(0,0,0) scale(1); }
+  50%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
+  100%{transform: translate3d(0,0,0) scale(1); }
 }
 
-/* ---------- Print ---------- */
+/* print */
 @media print {
-  #sideNav { display: none !important; }
-  .container-fluid { margin-left: 0 !important; padding-top: 0 !important; }
-  .resume-section { padding: 1rem !important; }
+  #sideNav{ display: none !important; }
+  .page-wrapper{ margin-left: 0 !important; }
+  .resume-section{ padding: 1rem !important; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; }
 }
