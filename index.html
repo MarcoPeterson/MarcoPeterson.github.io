@@ -17,28 +17,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;400;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600&display=swap" rel="stylesheet">
 
-  <!-- Site CSS -->
-  <link href="css/styles.css" rel="stylesheet" />
+  <!-- Site CSS (cache-busted) -->
+  <link href="css/styles.css?v=29" rel="stylesheet" />
 </head>
 
 <body id="page-top">
   <!-- Matrix background canvas (behind content) -->
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <!-- Left sidebar (photo above menu; menu centered & horizontal) -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
+  <!-- Left sidebar (photo above menu; menu centered) -->
+  <nav class="navbar navbar-dark fixed-top" id="sideNav">
     <a class="navbar-brand js-scroll-trigger" href="#page-top">
       <span class="d-block d-lg-none">Marco Peterson</span>
       <span class="d-none d-lg-block">
-        <img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="assets/img/profile.jpg" alt="Profile photo of Marco Peterson" />
+        <img class="img-fluid img-profile rounded-circle mx-auto mb-3" src="assets/img/profile.jpg" alt="Profile photo of Marco Peterson" />
       </span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
-      aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+
+    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarResponsive" aria-controls="navbarResponsive"
+            aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarResponsive">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav nav-pills-left">
         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#experience">Experience</a></li>
         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
@@ -51,11 +54,10 @@
 
   <!-- Page Content -->
   <div class="container-fluid p-0">
-
     <!-- About -->
     <section class="resume-section" id="about">
       <div class="resume-section-content">
-        <h1 class="mb-0">
+        <h1 class="mb-3">
           Marco <span class="text-primary">Peterson</span>
         </h1>
         <div class="subheading mb-4">
@@ -95,7 +97,7 @@
               <li>Delivered data-driven insights to marketing and operations, improving engagement and conversion via better customer understanding.</li>
             </ul>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">Sep 2021 – Present</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">Sep 2021 – Present</span></div>
         </div>
 
         <!-- Cradlepoint -->
@@ -109,7 +111,7 @@
               <li>Created decision-tree diagnostics to monitor and explain speed-test behavior in NetCloud.</li>
             </ul>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">Sep 2020 – 2021</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">Sep 2020 – 2021</span></div>
         </div>
 
         <!-- TXU Energy -->
@@ -122,7 +124,7 @@
               <li>Built reporting pipelines and reviewed operational metrics to align teams on performance drivers.</li>
             </ul>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">Jul 2019 – Sep 2020</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">Jul 2019 – Sep 2020</span></div>
         </div>
 
         <!-- OHSU -->
@@ -135,7 +137,7 @@
               <li>Automated EHR pipelines, cutting manual processing time by <strong>~25%</strong> within 6 months.</li>
             </ul>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">Apr 2017 – Feb 2019</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">Apr 2017 – Feb 2019</span></div>
         </div>
       </div>
     </section>
@@ -151,7 +153,7 @@
             <h3 class="mb-0">M.S., Economic Data Analytics</h3>
             <div class="subheading">The University of Texas at Arlington</div>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">2021</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">2021</span></div>
         </div>
 
         <div class="d-flex flex-column flex-md-row justify-content-between mb-4">
@@ -159,7 +161,7 @@
             <h3 class="mb-0">B.S., Industrial &amp; Organizational Psychology; Statistics</h3>
             <div class="subheading">Portland State University</div>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">2017</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">2017</span></div>
         </div>
 
         <div class="d-flex flex-column flex-md-row justify-content-between">
@@ -167,7 +169,7 @@
             <h3 class="mb-0">B.A., Analytic Philosophy</h3>
             <div class="subheading">The University of Alabama</div>
           </div>
-          <div class="flex-shrink-0"><span class="text-primary">2014</span></div>
+          <div class="flex-shrink-0"><span class="text-primary date-pill">2014</span></div>
         </div>
       </div>
     </section>
@@ -251,7 +253,7 @@
 
   <!-- Bootstrap JS bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Site JS (includes the Matrix background) -->
-  <script src="js/scripts.js"></script>
+  <!-- Site JS (cache-busted; includes the Matrix background) -->
+  <script src="js/scripts.js?v=29"></script>
 </body>
 </html>
