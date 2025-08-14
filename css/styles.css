@@ -1,19 +1,31 @@
 /* =========================================================
-   Portfolio Base Styles for Resume/Sections Layout
-   Works with Bootstrap 5 + Google Fonts (Raleway/Nunito)
+   Marco/Portfolio Styles — with animated gradient + code rain
+   Works with Bootstrap 5 + Raleway/Nunito
    ========================================================= */
 
-/* ---------- CSS Variables (easy theming) ---------- */
+/* ---------- Theme Variables ---------- */
 :root{
   --brand: #0d6efd;            /* primary accent */
+  --brand-2: #7b61ff;          /* secondary accent */
   --text:  #212529;            /* body text */
   --muted: #6c757d;            /* muted text */
-  --bg:    #ffffff;            /* page background */
-  --card:  #ffffff;            /* card bg */
-  --shadow: 0 6px 24px rgba(0,0,0,.06);
+  --bg:    #0b1020;            /* page background (dark-ish for code rain) */
+  --card:  rgba(255,255,255,.08);
+  --card-border: rgba(255,255,255,.15);
+  --glass: rgba(13,17,27,.6);
+  --shadow: 0 10px 30px rgba(0,0,0,.30);
 }
 
-/* ---------- Global Resets ---------- */
+/* Light mode fallback (if user forces light) */
+@media (prefers-color-scheme: light) {
+  :root{
+    --text: #1f2937;
+    --muted:#6b7280;
+    --bg:   #0b1020;
+  }
+}
+
+/* ---------- Global / Base ---------- */
 html, body { height: 100%; }
 html { scroll-behavior: smooth; }
 body {
@@ -22,46 +34,85 @@ body {
   font-family: "Nunito", "Muli", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
-/* Make anchor jumps stop below fixed navbar */
-.resume-section { scroll-margin-top: 5rem; }
+/* Animated gradient layer behind the canvas for subtle motion */
+body::before{
+  content:"";
+  position: fixed; inset: 0;
+  background: radial-gradient(1200px 800px at 15% 20%, rgba(123,97,255,.25), transparent 60%),
+              radial-gradient(900px 600px at 80% 10%, rgba(13,110,253,.35), transparent 60%),
+              radial-gradient(900px 700px at 70% 85%, rgba(0,255,200,.15), transparent 60%),
+              linear-gradient(120deg, #080c1a, #0b1020 40%, #0c1022 60%, #080c1a);
+  filter: saturate(110%);
+  animation: floatGradient 40s linear infinite;
+  z-index: 0;
+}
 
-/* Headings */
+/* Code-rain canvas sits above gradient, below content */
+#bg-canvas{
+  position: fixed; inset: 0;
+  z-index: 1;
+  pointer-events: none;        /* let clicks pass through */
+  opacity: .45;                /* tune intensity */
+  mix-blend-mode: screen;      /* blends nicely on dark bg */
+}
+
+/* Content sits above everything */
+#sideNav, .container-fluid { position: relative; z-index: 2; }
+
+/* Reduce motion: kill animations & heavy effects */
+@media (prefers-reduced-motion: reduce){
+  body::before { animation: none; }
+  #bg-canvas    { display: none; }
+}
+
+/* ---------- Headings / Typography ---------- */
 h1, h2, h3, h4, h5 {
   font-family: "Raleway", "Saira Extra Condensed", sans-serif;
-  letter-spacing: .25px;
-  color: var(--text);
+  letter-spacing: .3px;
   margin-bottom: .75rem;
+  color: #f3f5f7;
 }
 h1 { font-weight: 900; line-height: 1.1; }
 h2 { font-weight: 800; }
 .text-primary { color: var(--brand) !important; }
 
+.lead { color: #c7d0db; font-weight: 400; }
+.muted { color: var(--muted); }
+
 /* Links */
 a { color: var(--brand); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Horizontal rules between sections */
-hr.m-0 { border: 0; border-top: 1px solid rgba(0,0,0,.08); }
+/* Thin separators */
+hr.m-0 { border: 0; border-top: 1px solid rgba(255,255,255,.08); }
 
 /* ---------- Layout: Sidebar + Content ---------- */
 #sideNav {
   width: 18rem;
+  background: var(--glass) !important;     /* glass */
+  backdrop-filter: blur(8px) saturate(140%);
   box-shadow: var(--shadow);
+  border-right: 1px solid rgba(255,255,255,.12);
 }
+.navbar-dark .navbar-nav .nav-link { color: #e7ecf5; }
+.navbar-dark .navbar-nav .nav-link:hover { color: #fff; text-decoration: none; }
+.navbar-dark .navbar-toggler { border-color: rgba(255,255,255,.3); }
 
 /* Profile image in sidebar */
 .img-profile {
   max-width: 12rem;
   border: 4px solid rgba(255,255,255,.25);
+  box-shadow: 0 6px 24px rgba(0,0,0,.45);
 }
 
 /* Space sections and constrain line-length */
-.resume-section { padding: 3rem 1.25rem; }
+.resume-section { padding: 3rem 1.25rem; scroll-margin-top: 5rem; }
 .resume-section .resume-section-content { max-width: 1000px; }
 
-/* On desktop, fix the sidebar and offset page content */
+/* On desktop: fix sidebar and offset content */
 @media (min-width: 992px) {
   #sideNav {
     position: fixed; top: 0; left: 0;
@@ -75,71 +126,80 @@ hr.m-0 { border: 0; border-top: 1px solid rgba(0,0,0,.08); }
 }
 
 /* ---------- About block ---------- */
-#about .subheading a { color: inherit; }
-#about .lead { font-size: 1.05rem; color: var(--muted); }
+#about .subheading a { color: #e7ecf5; }
+#about .lead { font-size: 1.06rem; }
 
-/* ---------- Social icons row ---------- */
+/* ---------- Social icons ---------- */
 .social-icons a {
   display: inline-flex; align-items: center; justify-content: center;
   width: 3rem; height: 3rem;
   border-radius: 50%;
-  background: var(--brand); color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fff;
   margin-right: .5rem;
-  transition: transform .15s ease, opacity .15s ease;
-  box-shadow: 0 4px 12px rgba(13,110,253,.25);
+  transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+  box-shadow: 0 8px 22px rgba(13,110,253,.35);
 }
-.social-icons a:hover { transform: translateY(-2px); opacity: .92; }
+.social-icons a:hover { transform: translateY(-2px) scale(1.04); opacity: .98; }
 
 /* ---------- Lists inside experience/skills ---------- */
 .resume-section ul { padding-left: 1.1rem; }
 .resume-section li + li { margin-top: .4rem; }
-
-/* Job/company heading spacing */
-.resume-section .subheading { color: var(--muted); font-weight: 600; }
+.resume-section .subheading { color: #c7d0db; font-weight: 600; }
 
 /* ---------- Cards (Projects) ---------- */
 #projects .card {
-  border: none;
+  border: 1px solid var(--card-border);
   background: var(--card);
   box-shadow: var(--shadow);
-  border-radius: .75rem;
+  border-radius: .9rem;
+  backdrop-filter: blur(6px);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+#projects .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  border-color: rgba(123,97,255,.35);
 }
 #projects .card .card-body { padding: 1.75rem; }
-#projects .card-title { margin-bottom: .5rem; }
-#projects .btn { border-radius: .5rem; }
+#projects .card-title { margin-bottom: .5rem; color: #f5f7fa; }
+#projects .btn { border-radius: .55rem; }
 
 /* ---------- Tables (inside projects) ---------- */
-.table { font-size: .95rem; }
+.table { font-size: .95rem; color: #e8eef6; }
 .table thead th { border-bottom-width: 2px; }
 
 /* ---------- Buttons (general) ---------- */
-.btn-primary, .social-icons a {
-  background-color: var(--brand);
-  border-color: var(--brand);
+.btn-primary,
+.social-icons a {
+  border-color: transparent;
 }
-.btn-primary:hover {
-  filter: brightness(.95);
+.btn-primary {
+  background-image: linear-gradient(135deg, var(--brand), var(--brand-2));
 }
+.btn-primary:hover { filter: brightness(.96); }
 
-/* ---------- Tiny utilities ---------- */
-.muted { color: var(--muted); }
-.lead { font-weight: 400; }
-
-/* ---------- Dark mode (optional, automatic) ---------- */
-@media (prefers-color-scheme: dark) {
-  :root{
-    --brand: #61a8ff;
-    --text:  #e6e6e6;
-    --muted: #a9b1bb;
-    --bg:    #0f1115;
-    --card:  #151821;
-    --shadow: 0 6px 24px rgba(0,0,0,.5);
-  }
-  hr.m-0 { border-top-color: rgba(255,255,255,.08); }
-  .social-icons a { box-shadow: 0 6px 18px rgba(97,168,255,.25); }
+/* ---------- Fancy link underline on hover ---------- */
+a:not(.btn):not(.social-icon){
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size .2s ease;
+}
+a:not(.btn):not(.social-icon):hover{
+  text-decoration: none;
+  background-size: 100% 2px;
 }
 
-/* ---------- Print styles (keeps it tidy) ---------- */
+/* ---------- Keyframes ---------- */
+@keyframes floatGradient {
+  0% { transform: translate3d(0,0,0) scale(1); }
+  50%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
+  100%{transform: translate3d(0,0,0) scale(1); }
+}
+
+/* ---------- Print ---------- */
 @media print {
   #sideNav { display: none !important; }
   .container-fluid { margin: 0 !important; }
