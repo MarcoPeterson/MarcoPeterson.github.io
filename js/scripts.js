@@ -2,104 +2,133 @@
 * Start Bootstrap - Resume v7.0.4
 * MIT License
 */
-window.addEventListener('DOMContentLoaded', () => {
-  // Scrollspy
-  const sideNav = document.querySelector('#sideNav');
-  if (sideNav) new bootstrap.ScrollSpy(document.body, { target: '#sideNav', offset: 74 });
+window.addEventListener('DOMContentLoaded', event => {
+  // Activate Bootstrap scrollspy on the main nav element
+  const sideNav = document.body.querySelector('#sideNav');
+  if (sideNav) {
+    new bootstrap.ScrollSpy(document.body, {
+      target: '#sideNav',
+      offset: 74,
+    });
+  }
 
-  // Collapse responsive navbar when a link is clicked (mobile only)
-  const navbarToggler = document.querySelector('.navbar-toggler');
-  document.querySelectorAll('#navbarResponsive .nav-link').forEach((el) => {
-    el.addEventListener('click', () => {
-      if (window.getComputedStyle(navbarToggler).display !== 'none') navbarToggler.click();
+  // Collapse responsive navbar when toggler is visible (mobile)
+  const navbarToggler = document.body.querySelector('.navbar-toggler');
+  const responsiveNavItems = [].slice.call(
+    document.querySelectorAll('#navbarResponsive .nav-link')
+  );
+  responsiveNavItems.map(function (responsiveNavItem) {
+    responsiveNavItem.addEventListener('click', () => {
+      if (window.getComputedStyle(navbarToggler).display !== 'none') {
+        navbarToggler.click();
+      }
     });
   });
 });
 
-/* ================== MATRIX CODE RAIN (crisp 0/1 with light trail) ==================
-   - No glow, no page darkening, no stripes
-   - Head + short tail made of actual digits with decreasing alpha
-   - Slower streams
-=============================================================================== */
-(function matrix(){
+/* ================== Matrix 0/1 Rain (slow, behind content, off sidebar) ================== */
+(function(){
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d', { alpha: true });
 
-  // Tunables
-  const fontSize   = 18;        // px
-  const tailLen    = 8;         // number of trailing digits
-  const baseSpeed  = 0.05;      // slow
-  const varSpeed   = 0.03;      // slight randomness
-  const headAlpha  = 1.0;       // head brightness
-  const tailAlpha0 = 0.75;      // first tail digit alpha (then decays)
-  const digits     = ['0','1'];
-  const colorHex   = getComputedStyle(document.documentElement)
-                      .getPropertyValue('--matrix').trim() || '#00FF41';
+  const ctx  = canvas.getContext('2d', { alpha: true });
+  const DPR  = Math.max(1, window.devicePixelRatio || 1);
 
-  // Convert hex to rgb for alpha blending
-  function hexToRgb(hex){
-    const c = hex.replace('#','');
-    const s = c.length === 3 ? c.split('').map(v=>v+v).join('') : c;
-    return {
-      r: parseInt(s.slice(0,2),16),
-      g: parseInt(s.slice(2,4),16),
-      b: parseInt(s.slice(4,6),16)
-    };
-  }
-  const rgb = hexToRgb(colorHex);
+  // Visual tuning
+  const FONT_SIZE      = 16;        // px per column cell
+  const TAIL_LEN       = 8;         // short/light trail
+  const MIN_SPEED      = 30;        // px/sec
+  const MAX_SPEED      = 60;        // px/sec
+  const MIN_SWITCH_MS  = 900;       // slow 0↔1 flips
+  const MAX_SWITCH_MS  = 1800;
 
-  let W, H, columns, yPos, speeds;
+  const GLYPH_COLOR    = [0, 255, 65];   // Matrix green
+  const HEAD_ALPHA     = 0.95;           // head brightness
+  const TRAIL_ALPHA_0  = 0.16;           // first trail element alpha
+  const TRAIL_FALLOFF  = 0.02;           // alpha decrease per trail step
 
-  function resize(){
-    const ratio = window.devicePixelRatio || 1;
-    W = canvas.width  = Math.floor(window.innerWidth  * ratio);
-    H = canvas.height = Math.floor(window.innerHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.font = `${fontSize}px monospace`;
+  let W, H, COLS, colW;
+  let streams = [];
+  let lastT = performance.now();
+
+  function cssSize(el){ return { w: el.clientWidth, h: el.clientHeight }; }
+
+  function layout(){
+    // Match canvas pixels to its CSS box (CSS already moves it off the sidebar on desktop)
+    const { w, h } = cssSize(canvas);
+    W = canvas.width  = Math.max(1, Math.floor(w * DPR));
+    H = canvas.height = Math.max(1, Math.floor(h * DPR));
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    colW = FONT_SIZE;
+    COLS = Math.ceil(w / colW);
+
+    // Initialize columns
+    streams = new Array(COLS).fill(0).map((_, i) => ({
+      x: i * colW + colW / 2,           // center glyph in its cell
+      y: -Math.random() * h,            // start above screen
+      speed: MIN_SPEED + Math.random() * (MAX_SPEED - MIN_SPEED),
+      glyph: Math.random() < 0.5 ? '0' : '1',
+      lastSwitch: performance.now(),
+      switchEvery: MIN_SWITCH_MS + Math.random() * (MAX_SWITCH_MS - MIN_SWITCH_MS),
+      trail: []
+    }));
+
+    ctx.font = `${FONT_SIZE}px monospace`;
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-
-    columns = Math.ceil(window.innerWidth / fontSize);
-    yPos    = Array.from({length: columns}, () => -Math.random() * 40);
-    speeds  = Array.from({length: columns}, () => baseSpeed + Math.random() * varSpeed);
   }
 
-  function draw(){
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function frame(t){
+    const dt = Math.min(100, t - lastT) / 1000; // seconds
+    lastT = t;
 
-    // Start fresh each frame -> no glow/stripes
+    // Full clear so the background never accumulates
     ctx.clearRect(0, 0, W, H);
 
-    for (let col = 0; col < columns; col++){
-      const headY = yPos[col];
-
-      // draw head
-      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${headAlpha})`;
-      ctx.fillText(digits[(Math.random()*2)|0], col*fontSize, headY*fontSize);
-
-      // draw tail (decreasing alpha, discrete digits)
-      for (let t = 1; t <= tailLen; t++){
-        const y = (headY - t) * fontSize;
-        if (y < -fontSize) break;
-        const a = Math.max(tailAlpha0 * (1 - t/(tailLen+1)), 0);
-        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`;
-        ctx.fillText(digits[(Math.random()*2)|0], col*fontSize, y);
+    streams.forEach(s => {
+      // slow independent 0↔1 switching
+      if (t - s.lastSwitch > s.switchEvery){
+        s.glyph = (s.glyph === '0') ? '1' : '0';
+        s.lastSwitch = t;
+        s.switchEvery = MIN_SWITCH_MS + Math.random() * (MAX_SWITCH_MS - MIN_SWITCH_MS);
       }
 
       // advance
-      const py = headY * fontSize;
-      if (py > H && Math.random() > 0.985){
-        yPos[col]  = -Math.random() * 20;
-        speeds[col] = baseSpeed + Math.random() * varSpeed;
-      } else {
-        yPos[col] += speeds[col];
-      }
-    }
+      s.y += s.speed * dt;
 
-    requestAnimationFrame(draw);
+      // wrap when below screen
+      const cssH = canvas.clientHeight;
+      if (s.y > cssH + TAIL_LEN * FONT_SIZE){
+        s.y = -Math.random() * cssH;
+        s.trail.length = 0;
+      }
+
+      // push head position and clamp the trail
+      s.trail.push(s.y);
+      if (s.trail.length > TAIL_LEN) s.trail.shift();
+
+      // draw trail (older first; light)
+      for (let i = 1; i < s.trail.length; i++){
+        const yPos  = s.trail[s.trail.length - 1 - i];
+        const alpha = Math.max(0, TRAIL_ALPHA_0 - i * TRAIL_FALLOFF);
+        if (alpha <= 0) break;
+        ctx.fillStyle = `rgba(${GLYPH_COLOR.join(',')},${alpha})`;
+        ctx.fillText(s.glyph, s.x, yPos);
+      }
+
+      // draw head (slight glow)
+      ctx.shadowColor = `rgba(${GLYPH_COLOR.join(',')},0.6)`;
+      ctx.shadowBlur  = 6;
+      ctx.fillStyle   = `rgba(${GLYPH_COLOR.join(',')},${HEAD_ALPHA})`;
+      ctx.fillText(s.glyph, s.x, s.y);
+      ctx.shadowBlur = 0;
+    });
+
+    requestAnimationFrame(frame);
   }
 
-  window.addEventListener('resize', resize);
-  resize();
-  requestAnimationFrame(draw);
+  window.addEventListener('resize', layout);
+  layout();
+  requestAnimationFrame(frame);
 })();
